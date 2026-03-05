@@ -159,15 +159,17 @@ def random_time_minutes(rng: random.Random) -> int:
     return rng.randint(0, 23 * 60 + 59)
 
 
-def format_minutes(total_minutes: int) -> str:
+def format_time_with_date(total_minutes: int, flight_day: date) -> str:
     hours = total_minutes // 60
     minutes = total_minutes % 60
-    return f"{hours:02d}:{minutes:02d}"
+    return f"{minutes:02d}:{hours:02d} {flight_day.strftime('%d.%m.%Y')}"
 
 
 def build_flights(rows: int, airline_codes: list[int], seed: int) -> pl.DataFrame:
     rng = random.Random(seed)
     flight_numbers = rng.sample(range(100_000, 1_000_000), rows)
+    plane_pool_size = max(50, rows // 5)
+    msn_to_model: dict[str, str] = {}
     airport_codes = [
         "FRA",
         "MUC",
@@ -195,8 +197,8 @@ def build_flights(rows: int, airline_codes: list[int], seed: int) -> pl.DataFram
 
     records = {
         "flight_number": [],
+        "msn": [],
         "aircraft_model": [],
-        "flight_date": [],
         "error_free": [],
         "airline_code": [],
         "departure_airport": [],
@@ -207,20 +209,23 @@ def build_flights(rows: int, airline_codes: list[int], seed: int) -> pl.DataFram
 
     for flight_number in flight_numbers:
         flight_date = random_flight_date(rng)
+        msn = f"MSN{(100_000 + (flight_number % plane_pool_size)):06d}"
+        if msn not in msn_to_model:
+            msn_to_model[msn] = rng.choice(AIRCRAFT_MODELS)
         departure_airport, arrival_airport = rng.sample(airport_codes, 2)
         departure_minutes = random_time_minutes(rng)
         flight_duration_minutes = rng.randint(50, 720)
         arrival_minutes = (departure_minutes + flight_duration_minutes) % (24 * 60)
 
         records["flight_number"].append(f"FL{flight_number}")
-        records["aircraft_model"].append(rng.choice(AIRCRAFT_MODELS))
-        records["flight_date"].append(flight_date.strftime("%d.%m.%Y"))
+        records["msn"].append(msn)
+        records["aircraft_model"].append(msn_to_model[msn])
         records["error_free"].append(rng.random() < 0.9)
         records["airline_code"].append(rng.choice(airline_codes))
         records["departure_airport"].append(departure_airport)
         records["arrival_airport"].append(arrival_airport)
-        records["departure_time"].append(format_minutes(departure_minutes))
-        records["arrival_time"].append(format_minutes(arrival_minutes))
+        records["departure_time"].append(format_time_with_date(departure_minutes, flight_date))
+        records["arrival_time"].append(format_time_with_date(arrival_minutes, flight_date))
 
     return pl.DataFrame(records)
 
