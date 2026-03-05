@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "data-gen"
+version = "0.1.0"
+description = "Dataset generator for benchmark inputs."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "polars>=1.0.0",
+]
+
+[tool.setuptools]
+py-modules = []
