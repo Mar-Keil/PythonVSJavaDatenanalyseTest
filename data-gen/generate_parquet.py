@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate reproducible aircraft and airline Parquet datasets."""
+"""Generate reproducible flight and airline Parquet datasets."""
 
 from __future__ import annotations
 
@@ -13,63 +13,74 @@ import polars as pl
 
 BASE_DIR = Path(__file__).resolve().parent
 AIRCRAFT_MODELS = [
-    "A220",
-    "A320 NEO",
-    "A321 NEO ACF",
-    "A321 XLR",
+    "A220-100",
+    "A220-300",
+    "A319neo",
+    "A320neo",
+    "A321neo",
+    "A321LR",
+    "A321XLR",
     "A330-800",
     "A330-900",
-    "A330 MRTT",
     "A350-900",
     "A350-1000",
     "A350-900 ULR",
-    "A350F",
-    "A380-800",
-    "A400M",
-    "Eurofighter",
+    "A380-800"
 ]
 
 AIRLINE_NAMES = [
-    "SkyBridge Air",
-    "Nordic Wings",
-    "Atlantic Horizon",
-    "Global Vista Airlines",
-    "Blue Meridian",
-    "Aurora Flight",
-    "Summit Jet",
-    "Pacific Orbit",
-    "Silver Cloud Air",
-    "Helios Airways",
-    "Polar Stream",
-    "Unity Air",
-    "Crescent Skies",
-    "Falcon Route",
-    "Aero Nexus",
-    "MetroAir",
-    "Starline Aviation",
-    "Vista Regional",
-    "Cloudspan",
-    "Zenith Airways",
-    "NorthGate Air",
-    "EastBridge Airlines",
-    "WestPoint Aviation",
-    "SouthWind Air",
-    "Vector Airlines",
-    "Horizon Connect",
-    "Orbit Regional",
-    "Blue Arc Air",
-    "Meridian Flight",
-    "AeroPrime",
-    "TriStar Air",
-    "Pioneer Wings",
-    "SunRoute",
-    "Skyline Express",
-    "NextGen Air",
-    "Frontier Link",
-    "Altitude Airlines",
-    "Comet Air",
-    "SkyPort",
-    "Crosswind Air",
+    "Lufthansa",
+    "SWISS",
+    "Edelweiss Air",
+    "Austrian Airlines",
+    "Eurowings",
+    "Iberia",
+    "Air France",   
+    "KLM",
+    "Condor",
+    "Marabu",
+    "easyJet",
+    "Ryanair",
+    "ANA",
+    "Delta Air Lines",
+    "Icelandair",
+    "SAS",
+    "Emirates",
+    "Qatar Airways",
+    "JetBlue",
+    "Turkish Airlines",
+    "British Airways",
+    "Virgin Atlantic",
+    "Finnair",
+    "Air Canada",
+    "United Airlines",
+    "American Airlines",
+    "Alaska Airlines",
+    "Spirit Airlines",
+    "Frontier Airlines",
+    "WestJet",
+    "Aer Lingus",
+    "TAP Air Portugal",
+    "Vueling",
+    "Wizz Air",
+    "Norwegian",
+    "LOT Polish Airlines",
+    "Czech Airlines",
+    "Air Baltic",
+    "Croatia Airlines",
+    "Air Serbia",
+    "Olympic Air",
+    "Aegean Airlines",
+    "Etihad Airways",
+    "Saudia",
+    "Singapore Airlines",
+    "Cathay Pacific",
+    "Thai Airways",
+    "Malaysia Airlines",
+    "Garuda Indonesia",
+    "Korean Air",
+    "Japan Airlines",
+
 ]
 
 
@@ -83,14 +94,14 @@ class GeneratorConfig:
 
 def parse_args() -> GeneratorConfig:
     parser = argparse.ArgumentParser(
-        description="Generate aircraft and airline benchmark datasets as Parquet files."
+        description="Generate flight and airline benchmark datasets as Parquet files."
     )
-    parser.add_argument("--rows", type=int, default=1000, help="Number of aircraft rows.")
+    parser.add_argument("--rows", type=int, default=1000, help="Number of flight rows.")
     parser.add_argument(
         "--airlines",
         type=int,
-        default=40,
-        help="Number of airline rows (distinct airline codes).",
+        default=None,
+        help="Number of airline rows (distinct airline codes). Defaults to all names in AIRLINE_NAMES.",
     )
     parser.add_argument("--seed", type=int, default=42, help="Random seed.")
     parser.add_argument(
@@ -103,22 +114,24 @@ def parse_args() -> GeneratorConfig:
 
     if args.rows <= 0:
         raise ValueError("--rows must be greater than 0")
-    if args.airlines <= 0:
+    airlines = len(AIRLINE_NAMES) if args.airlines is None else args.airlines
+
+    if airlines <= 0:
         raise ValueError("--airlines must be greater than 0")
-    if args.airlines > len(AIRLINE_NAMES):
+    if airlines > len(AIRLINE_NAMES):
         raise ValueError(f"--airlines must be <= {len(AIRLINE_NAMES)}")
-    if args.rows > 90_000:
-        raise ValueError("--rows must be <= 90000 to keep MSN 5-digit and unique")
+    if args.rows > 900_000:
+        raise ValueError("--rows must be <= 900000 to keep flight_number unique")
 
     return GeneratorConfig(
         rows=args.rows,
-        airlines=args.airlines,
+        airlines=airlines,
         seed=args.seed,
         output_dir=args.output_dir,
     )
 
 
-def random_delivery_date(rng: random.Random) -> date:
+def random_flight_date(rng: random.Random) -> date:
     year = rng.randint(2016, 2026)
     start = date(year, 1, 1)
     day_offset = rng.randint(0, 364)
@@ -142,26 +155,72 @@ def build_airlines(codes: list[int], seed: int) -> pl.DataFrame:
     return pl.DataFrame(rows)
 
 
-def build_aircraft(rows: int, airline_codes: list[int], seed: int) -> pl.DataFrame:
+def random_time_minutes(rng: random.Random) -> int:
+    return rng.randint(0, 23 * 60 + 59)
+
+
+def format_minutes(total_minutes: int) -> str:
+    hours = total_minutes // 60
+    minutes = total_minutes % 60
+    return f"{hours:02d}:{minutes:02d}"
+
+
+def build_flights(rows: int, airline_codes: list[int], seed: int) -> pl.DataFrame:
     rng = random.Random(seed)
-    msns = rng.sample(range(10_000, 100_000), rows)
+    flight_numbers = rng.sample(range(100_000, 1_000_000), rows)
+    airport_codes = [
+        "FRA",
+        "MUC",
+        "BER",
+        "HAM",
+        "DUS",
+        "ZRH",
+        "VIE",
+        "CDG",
+        "AMS",
+        "LHR",
+        "MAD",
+        "BCN",
+        "IST",
+        "DXB",
+        "DOH",
+        "JFK",
+        "LAX",
+        "ORD",
+        "ATL",
+        "SIN",
+        "HND",
+        "ICN",
+    ]
 
     records = {
-        "msn": [],
+        "flight_number": [],
         "aircraft_model": [],
-        "delivery_date": [],
-        "ready_for_service": [],
+        "flight_date": [],
+        "error_free": [],
         "airline_code": [],
+        "departure_airport": [],
+        "arrival_airport": [],
+        "departure_time": [],
+        "arrival_time": [],
     }
 
-    for msn in msns:
-        delivery = random_delivery_date(rng)
+    for flight_number in flight_numbers:
+        flight_date = random_flight_date(rng)
+        departure_airport, arrival_airport = rng.sample(airport_codes, 2)
+        departure_minutes = random_time_minutes(rng)
+        flight_duration_minutes = rng.randint(50, 720)
+        arrival_minutes = (departure_minutes + flight_duration_minutes) % (24 * 60)
 
-        records["msn"].append(msn)
+        records["flight_number"].append(f"FL{flight_number}")
         records["aircraft_model"].append(rng.choice(AIRCRAFT_MODELS))
-        records["delivery_date"].append(delivery.strftime("%d.%m.%Y"))
-        records["ready_for_service"].append(rng.random() < 0.9)
+        records["flight_date"].append(flight_date.strftime("%d.%m.%Y"))
+        records["error_free"].append(rng.random() < 0.9)
         records["airline_code"].append(rng.choice(airline_codes))
+        records["departure_airport"].append(departure_airport)
+        records["arrival_airport"].append(arrival_airport)
+        records["departure_time"].append(format_minutes(departure_minutes))
+        records["arrival_time"].append(format_minutes(arrival_minutes))
 
     return pl.DataFrame(records)
 
@@ -172,7 +231,7 @@ def main() -> None:
     airline_codes = sorted(rng.sample(range(1000, 9999), config.airlines))
 
     airlines_df = build_airlines(codes=airline_codes, seed=config.seed)
-    aircraft_df = build_aircraft(
+    flights_df = build_flights(
         rows=config.rows,
         airline_codes=airline_codes,
         seed=config.seed,
@@ -180,13 +239,13 @@ def main() -> None:
 
     config.output_dir.mkdir(parents=True, exist_ok=True)
     airlines_path = config.output_dir / "airlines.parquet"
-    aircraft_path = config.output_dir / "aircraft.parquet"
+    flights_path = config.output_dir / "flights.parquet"
 
     airlines_df.write_parquet(airlines_path, compression="zstd")
-    aircraft_df.write_parquet(aircraft_path, compression="zstd")
+    flights_df.write_parquet(flights_path, compression="zstd")
 
     print(f"Wrote {len(airlines_df)} rows to {airlines_path}")
-    print(f"Wrote {len(aircraft_df)} rows to {aircraft_path}")
+    print(f"Wrote {len(flights_df)} rows to {flights_path}")
 
 
 if __name__ == "__main__":
