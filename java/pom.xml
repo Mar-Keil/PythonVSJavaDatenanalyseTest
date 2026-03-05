@@ -12,7 +12,6 @@
     <maven.compiler.release>25</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <tablesaw.version>0.43.1</tablesaw.version>
-    <duckdb.version>0.10.1</duckdb.version>
   </properties>
 
   <dependencies>
@@ -20,11 +19,6 @@
       <groupId>tech.tablesaw</groupId>
       <artifactId>tablesaw-core</artifactId>
       <version>${tablesaw.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.duckdb</groupId>
-      <artifactId>duckdb_jdbc</artifactId>
-      <version>${duckdb.version}</version>
     </dependency>
   </dependencies>
 
