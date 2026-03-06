@@ -24,7 +24,6 @@ AIRCRAFT_MODELS = [
     "A330-900",
     "A350-900",
     "A350-1000",
-    "A350-900 ULR",
     "A380-800"
 ]
 
@@ -81,6 +80,31 @@ AIRLINE_NAMES = [
     "Korean Air",
     "Japan Airlines",
 
+]
+
+AIRPORT_CODES = [
+    "FRA",
+    "MUC",
+    "BER",
+    "HAM",
+    "DUS",
+    "ZRH",
+    "VIE",
+    "CDG",
+    "AMS",
+    "LHR",
+    "MAD",
+    "BCN",
+    "IST",
+    "DXB",
+    "DOH",
+    "JFK",
+    "LAX",
+    "ORD",
+    "ATL",
+    "SIN",
+    "HND",
+    "ICN",
 ]
 
 
@@ -170,30 +194,6 @@ def build_flights(rows: int, airline_codes: list[int], seed: int) -> pl.DataFram
     flight_numbers = rng.sample(range(100_000, 1_000_000), rows)
     plane_pool_size = max(50, rows // 5)
     msn_to_model: dict[str, str] = {}
-    airport_codes = [
-        "FRA",
-        "MUC",
-        "BER",
-        "HAM",
-        "DUS",
-        "ZRH",
-        "VIE",
-        "CDG",
-        "AMS",
-        "LHR",
-        "MAD",
-        "BCN",
-        "IST",
-        "DXB",
-        "DOH",
-        "JFK",
-        "LAX",
-        "ORD",
-        "ATL",
-        "SIN",
-        "HND",
-        "ICN",
-    ]
 
     records = {
         "flight_number": [],
@@ -212,7 +212,7 @@ def build_flights(rows: int, airline_codes: list[int], seed: int) -> pl.DataFram
         msn = f"MSN{(100_000 + (flight_number % plane_pool_size)):06d}"
         if msn not in msn_to_model:
             msn_to_model[msn] = rng.choice(AIRCRAFT_MODELS)
-        departure_airport, arrival_airport = rng.sample(airport_codes, 2)
+        departure_airport, arrival_airport = rng.sample(AIRPORT_CODES, 2)
         departure_minutes = random_time_minutes(rng)
         flight_duration_minutes = rng.randint(50, 720)
         arrival_minutes = (departure_minutes + flight_duration_minutes) % (24 * 60)
