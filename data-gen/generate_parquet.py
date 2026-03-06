@@ -213,6 +213,7 @@ def build_flights(rows: int, airline_codes: list[int], seed: int) -> pl.DataFram
         "arrival_airport": [],
         "departure_time": [],
         "arrival_time": [],
+        "flight_distance": [],
     }
 
     for flight_number in flight_numbers:
@@ -234,6 +235,8 @@ def build_flights(rows: int, airline_codes: list[int], seed: int) -> pl.DataFram
         records["arrival_airport"].append(arrival_airport)
         records["departure_time"].append(format_time(departure_minutes, departure_day))
         records["arrival_time"].append(format_time(arrival_minutes, arrival_day))
+        # Distance in kilometers (float64), loosely correlated with flight duration.
+        records["flight_distance"].append(round(duration_minutes * rng.uniform(9.0, 14.0), 2))
 
     return pl.DataFrame(records)
 

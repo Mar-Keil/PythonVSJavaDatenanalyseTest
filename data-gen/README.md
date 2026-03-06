@@ -30,5 +30,8 @@ Erzeugte Dateien:
 - `out/aircraft.parquet`
 - `out/airlines.parquet`
 
+`flights` enthaelt zusaetzlich die Spalte:
+- `flight_distance` (Float64, Kilometer)
+
 Join-Schluessel:
 - `aircraft.airline_code` = `airlines.airline_code`
