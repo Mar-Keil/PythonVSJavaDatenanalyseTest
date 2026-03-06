@@ -1,4 +1,4 @@
-# Polars Dataset Access
+# Pandas Dataset Access
 
 Dieses Verzeichnis enthaelt ein minimales Lade-Skript fuer die Datensaetze aus
 `data-gen/out`.
@@ -9,15 +9,15 @@ Dieses Verzeichnis enthaelt ein minimales Lade-Skript fuer die Datensaetze aus
 
 ## Ausfuehrung
 ```bash
-python python/polars/transformation_polars.py
+python python/pandas/transformation_pandas.py
 ```
 
 ## Output
-- `python/polars/out/filter.parquet`
+- `python/pandas/out/filter.parquet`
 
 ## Verwendung in eigenem Code
 ```python
-from python.polars.transformation_polars import load_datasets
+from python.pandas.transformation_pandas import load_datasets
 
 flights_df, airlines_df = load_datasets()
 ```
