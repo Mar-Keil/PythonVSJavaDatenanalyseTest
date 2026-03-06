@@ -34,7 +34,7 @@ AIRLINE_NAMES = [
     "Austrian Airlines",
     "Eurowings",
     "Iberia",
-    "Air France",   
+    "Air France",
     "KLM",
     "Condor",
     "Marabu",
@@ -79,7 +79,6 @@ AIRLINE_NAMES = [
     "Garuda Indonesia",
     "Korean Air",
     "Japan Airlines",
-
 ]
 
 AIRPORT_CODES = [
@@ -169,12 +168,14 @@ def build_airlines(codes: list[int], seed: int) -> pl.DataFrame:
         "airline_code": [],
         "airline_name": [],
         "founding_year": [],
+        "hub_airport": [],
     }
 
     for idx, code in enumerate(codes):
         rows["airline_code"].append(code)
         rows["airline_name"].append(AIRLINE_NAMES[idx])
         rows["founding_year"].append(rng.randint(1950, 2020))
+        rows["hub_airport"].append(rng.choice(AIRPORT_CODES))
 
     return pl.DataFrame(rows)
 
@@ -183,10 +184,17 @@ def random_time_minutes(rng: random.Random) -> int:
     return rng.randint(0, 23 * 60 + 59)
 
 
-def format_time_with_date(total_minutes: int, flight_day: date) -> str:
+def format_time(total_minutes: int, day: date) -> str:
     hours = total_minutes // 60
     minutes = total_minutes % 60
-    return f"{minutes:02d}:{hours:02d} {flight_day.strftime('%d.%m.%Y')}"
+    return f"{hours:02d}:{minutes:02d} {day.strftime('%d.%m.%Y')}"
+
+
+def arrival_schedule(departure_minutes: int, duration_minutes: int, departure_day: date) -> tuple[int, date]:
+    total_arrival_minutes = departure_minutes + duration_minutes
+    arrival_minutes = total_arrival_minutes % (24 * 60)
+    arrival_day = departure_day + timedelta(days=total_arrival_minutes // (24 * 60))
+    return arrival_minutes, arrival_day
 
 
 def build_flights(rows: int, airline_codes: list[int], seed: int) -> pl.DataFrame:
@@ -208,14 +216,14 @@ def build_flights(rows: int, airline_codes: list[int], seed: int) -> pl.DataFram
     }
 
     for flight_number in flight_numbers:
-        flight_date = random_flight_date(rng)
+        departure_day = random_flight_date(rng)
         msn = f"MSN{(100_000 + (flight_number % plane_pool_size)):06d}"
         if msn not in msn_to_model:
             msn_to_model[msn] = rng.choice(AIRCRAFT_MODELS)
         departure_airport, arrival_airport = rng.sample(AIRPORT_CODES, 2)
         departure_minutes = random_time_minutes(rng)
-        flight_duration_minutes = rng.randint(50, 720)
-        arrival_minutes = (departure_minutes + flight_duration_minutes) % (24 * 60)
+        duration_minutes = rng.randint(50, 720)
+        arrival_minutes, arrival_day = arrival_schedule(departure_minutes, duration_minutes, departure_day)
 
         records["flight_number"].append(f"FL{flight_number}")
         records["msn"].append(msn)
@@ -224,8 +232,8 @@ def build_flights(rows: int, airline_codes: list[int], seed: int) -> pl.DataFram
         records["airline_code"].append(rng.choice(airline_codes))
         records["departure_airport"].append(departure_airport)
         records["arrival_airport"].append(arrival_airport)
-        records["departure_time"].append(format_time_with_date(departure_minutes, flight_date))
-        records["arrival_time"].append(format_time_with_date(arrival_minutes, flight_date))
+        records["departure_time"].append(format_time(departure_minutes, departure_day))
+        records["arrival_time"].append(format_time(arrival_minutes, arrival_day))
 
     return pl.DataFrame(records)
 
