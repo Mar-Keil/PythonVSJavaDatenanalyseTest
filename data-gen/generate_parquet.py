@@ -13,13 +13,14 @@ import polars as pl
 
 BASE_DIR = Path(__file__).resolve().parent
 FLIGHT_NUMBER_MIN = 10_000_000
-FLIGHT_NUMBER_MAX_EXCLUSIVE = 20_000_000
+FLIGHT_NUMBER_MAX_EXCLUSIVE = 100_000_000
 BENCHMARK_DATASET_ROWS = [
-    20_000,
+    25_000,
     100_000,
-    # 500_000,
-    # 2_500_000,
-    # 12_500_000,
+    400_000,
+    1_600_000,
+    6_400_000,
+    25_600_000,
 ]
 AIRCRAFT_MODELS = [
     "A220-100",
