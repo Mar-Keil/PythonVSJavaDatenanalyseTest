@@ -174,12 +174,6 @@ def parse_args() -> GeneratorConfig:
         raise ValueError("--airlines must be greater than 0")
     if airlines > len(AIRLINE_NAMES):
         raise ValueError(f"--airlines must be <= {len(AIRLINE_NAMES)}")
-    max_unique_flight_numbers = FLIGHT_NUMBER_MAX_EXCLUSIVE - FLIGHT_NUMBER_MIN
-    rows_to_validate = max(BENCHMARK_DATASET_ROWS) if args.benchmark_sizes else args.rows
-    if rows_to_validate > max_unique_flight_numbers:
-        raise ValueError(
-            f"--rows must be <= {max_unique_flight_numbers} to keep flight_number unique"
-        )
 
     return GeneratorConfig(
         rows=args.rows,
@@ -240,7 +234,7 @@ def arrival_schedule(departure_minutes: int, duration_minutes: int, departure_da
 
 def build_flights(rows: int, airline_codes: list[int], seed: int, reference_date: date) -> pl.DataFrame:
     rng = random.Random(seed)
-    flight_numbers = rng.sample(range(FLIGHT_NUMBER_MIN, FLIGHT_NUMBER_MAX_EXCLUSIVE), rows)
+    flight_numbers = range(FLIGHT_NUMBER_MIN, FLIGHT_NUMBER_MIN + rows)
     plane_pool_size = max(50, rows // 5)
     msn_to_model: dict[str, str] = {}
     max_arrival_day_shift = (23 * 60 + 59 + MAX_FLIGHT_DURATION_MINUTES) // (24 * 60)
