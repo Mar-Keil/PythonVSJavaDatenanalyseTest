@@ -3,6 +3,13 @@ Das Projekt vergleicht die Effizienz von Datenanalyse-Frameworks in Java und Pyt
 Geplant sind Analysen mit Polars, Pandas und Tablesaw, inkl. Messung von Laufzeit,
 CPU und RAM.
 
+## Grobes Vorhaben
+Dieses Repository soll eine reproduzierbare Vergleichsbasis schaffen, mit der identische
+Analyseaufgaben in Python (Pandas/Polars) und Java (Tablesaw) auf denselben Parquet-Daten
+ausgefuehrt werden. Ziel ist es, die Ergebnisse fachlich abzugleichen und anschliessend
+messbar zu vergleichen, welche Kombination aus Sprache und Framework bei verschiedenen
+Datengroessen effizienter ist.
+
 ## Ordnerstruktur
 - `java/`: Maven-Projekt (OpenJDK 25) für Tablesaw
 - `python/`: Python-Projekt für Polars/Pandas

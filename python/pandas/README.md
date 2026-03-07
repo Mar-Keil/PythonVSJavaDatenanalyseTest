@@ -9,7 +9,7 @@ Dieses Verzeichnis enthaelt ein minimales Lade-Skript fuer die Datensaetze aus
 
 ## Ausfuehrung
 ```bash
-python python/pandas/transformation_pandas.py
+python python/pandas/filter_pandas.py
 ```
 
 ## Output

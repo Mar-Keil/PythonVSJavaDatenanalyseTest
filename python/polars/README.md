@@ -9,7 +9,7 @@ Dieses Verzeichnis enthaelt ein minimales Lade-Skript fuer die Datensaetze aus
 
 ## Ausfuehrung
 ```bash
-python python/polars/transformation_polars.py
+python python/polars/filter_polars.py
 ```
 
 ## Output
