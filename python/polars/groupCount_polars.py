@@ -11,7 +11,7 @@ DATA_GEN_OUT = BASE_DIR.parent.parent / "data-gen" / "out"
 FLIGHTS_PATH = DATA_GEN_OUT / "flights.parquet"
 AIRLINES_PATH = DATA_GEN_OUT / "airlines.parquet"
 OUT_DIR = BASE_DIR / "out"
-OUT_PATH = OUT_DIR / "groupCount.parquet"
+OUT_PATH = OUT_DIR / "groupCount_polars.parquet"
 
 
 def load_datasets() -> tuple[pl.DataFrame, pl.DataFrame]:
