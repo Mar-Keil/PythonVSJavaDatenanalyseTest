@@ -13,7 +13,14 @@ import polars as pl
 
 BASE_DIR = Path(__file__).resolve().parent
 FLIGHT_NUMBER_MIN = 10_000_000
-FLIGHT_NUMBER_MAX_EXCLUSIVE = 100_000_000
+FLIGHT_NUMBER_MAX_EXCLUSIVE = 20_000_000
+BENCHMARK_DATASET_ROWS = [
+    20_000,
+    100_000,
+    # 500_000,
+    # 2_500_000,
+    # 12_500_000,
+]
 AIRCRAFT_MODELS = [
     "A220-100",
     "A220-300",
@@ -115,6 +122,7 @@ class GeneratorConfig:
     airlines: int
     seed: int
     reference_date: date
+    benchmark_sizes: bool
     output_dir: Path
 
 
@@ -142,9 +150,22 @@ def parse_args() -> GeneratorConfig:
         default=BASE_DIR / "out",
         help="Directory for generated Parquet files.",
     )
+    parser.add_argument(
+        "--benchmark-sizes",
+        dest="benchmark_sizes",
+        action="store_true",
+        default=True,
+        help="Generate benchmark dataset folders from BENCHMARK_DATASET_ROWS (default).",
+    )
+    parser.add_argument(
+        "--single-size",
+        dest="benchmark_sizes",
+        action="store_false",
+        help="Generate only one dataset using --rows in the output-dir root.",
+    )
     args = parser.parse_args()
 
-    if args.rows <= 0:
+    if not args.benchmark_sizes and args.rows <= 0:
         raise ValueError("--rows must be greater than 0")
     airlines = len(AIRLINE_NAMES) if args.airlines is None else args.airlines
 
@@ -153,7 +174,8 @@ def parse_args() -> GeneratorConfig:
     if airlines > len(AIRLINE_NAMES):
         raise ValueError(f"--airlines must be <= {len(AIRLINE_NAMES)}")
     max_unique_flight_numbers = FLIGHT_NUMBER_MAX_EXCLUSIVE - FLIGHT_NUMBER_MIN
-    if args.rows > max_unique_flight_numbers:
+    rows_to_validate = max(BENCHMARK_DATASET_ROWS) if args.benchmark_sizes else args.rows
+    if rows_to_validate > max_unique_flight_numbers:
         raise ValueError(
             f"--rows must be <= {max_unique_flight_numbers} to keep flight_number unique"
         )
@@ -163,6 +185,7 @@ def parse_args() -> GeneratorConfig:
         airlines=airlines,
         seed=args.seed,
         reference_date=args.reference_date,
+        benchmark_sizes=args.benchmark_sizes,
         output_dir=args.output_dir,
     )
 
@@ -260,28 +283,70 @@ def build_flights(rows: int, airline_codes: list[int], seed: int, reference_date
     return pl.DataFrame(records)
 
 
-def main() -> None:
-    config = parse_args()
+def write_dataset(rows: int, config: GeneratorConfig, output_dir: Path) -> None:
     rng = random.Random(config.seed)
     airline_codes = sorted(rng.sample(range(1000, 9999), config.airlines))
 
     airlines_df = build_airlines(codes=airline_codes, seed=config.seed)
     flights_df = build_flights(
-        rows=config.rows,
+        rows=rows,
         airline_codes=airline_codes,
         seed=config.seed,
         reference_date=config.reference_date,
     )
 
-    config.output_dir.mkdir(parents=True, exist_ok=True)
-    airlines_path = config.output_dir / "airlines.parquet"
-    flights_path = config.output_dir / "flights.parquet"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    airlines_path = output_dir / "airlines.parquet"
+    flights_path = output_dir / "flights.parquet"
 
     airlines_df.write_parquet(airlines_path, compression="zstd")
     flights_df.write_parquet(flights_path, compression="zstd")
 
     print(f"Wrote {len(airlines_df)} rows to {airlines_path}")
     print(f"Wrote {len(flights_df)} rows to {flights_path}")
+
+
+def format_rows_label(rows: int) -> str:
+    if rows % 1_000_000 == 0:
+        return f"{rows // 1_000_000}m"
+    if rows % 1_000 == 0:
+        return f"{rows // 1_000}k"
+    return str(rows)
+
+
+def write_airlines_once(config: GeneratorConfig, output_dir: Path) -> None:
+    rng = random.Random(config.seed)
+    airline_codes = sorted(rng.sample(range(1000, 9999), config.airlines))
+    airlines_df = build_airlines(codes=airline_codes, seed=config.seed)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    airlines_path = output_dir / "airlines.parquet"
+    airlines_df.write_parquet(airlines_path, compression="zstd")
+    print(f"Wrote {len(airlines_df)} rows to {airlines_path}")
+
+
+def write_flights_only(rows: int, config: GeneratorConfig, output_dir: Path) -> None:
+    rng = random.Random(config.seed)
+    airline_codes = sorted(rng.sample(range(1000, 9999), config.airlines))
+    flights_df = build_flights(
+        rows=rows,
+        airline_codes=airline_codes,
+        seed=config.seed,
+        reference_date=config.reference_date,
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    flights_path = output_dir / f"{format_rows_label(rows)}Flights.parquet"
+    flights_df.write_parquet(flights_path, compression="zstd")
+    print(f"Wrote {len(flights_df)} rows to {flights_path}")
+
+
+def main() -> None:
+    config = parse_args()
+    if config.benchmark_sizes:
+        write_airlines_once(config=config, output_dir=config.output_dir)
+        for rows in BENCHMARK_DATASET_ROWS:
+            write_flights_only(rows=rows, config=config, output_dir=config.output_dir)
+    else:
+        write_dataset(rows=config.rows, config=config, output_dir=config.output_dir)
 
 
 if __name__ == "__main__":
