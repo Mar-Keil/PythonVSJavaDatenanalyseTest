@@ -12,6 +12,8 @@ from pathlib import Path
 import polars as pl
 
 BASE_DIR = Path(__file__).resolve().parent
+FLIGHT_NUMBER_MIN = 10_000_000
+FLIGHT_NUMBER_MAX_EXCLUSIVE = 100_000_000
 AIRCRAFT_MODELS = [
     "A220-100",
     "A220-300",
@@ -150,8 +152,11 @@ def parse_args() -> GeneratorConfig:
         raise ValueError("--airlines must be greater than 0")
     if airlines > len(AIRLINE_NAMES):
         raise ValueError(f"--airlines must be <= {len(AIRLINE_NAMES)}")
-    if args.rows > 900_000:
-        raise ValueError("--rows must be <= 900000 to keep flight_number unique")
+    max_unique_flight_numbers = FLIGHT_NUMBER_MAX_EXCLUSIVE - FLIGHT_NUMBER_MIN
+    if args.rows > max_unique_flight_numbers:
+        raise ValueError(
+            f"--rows must be <= {max_unique_flight_numbers} to keep flight_number unique"
+        )
 
     return GeneratorConfig(
         rows=args.rows,
@@ -211,7 +216,7 @@ def arrival_schedule(departure_minutes: int, duration_minutes: int, departure_da
 
 def build_flights(rows: int, airline_codes: list[int], seed: int, reference_date: date) -> pl.DataFrame:
     rng = random.Random(seed)
-    flight_numbers = rng.sample(range(100_000, 1_000_000), rows)
+    flight_numbers = rng.sample(range(FLIGHT_NUMBER_MIN, FLIGHT_NUMBER_MAX_EXCLUSIVE), rows)
     plane_pool_size = max(50, rows // 5)
     msn_to_model: dict[str, str] = {}
     max_arrival_day_shift = (23 * 60 + 59 + MAX_FLIGHT_DURATION_MINUTES) // (24 * 60)
