@@ -1,7 +1,7 @@
 # Datensatz-Generator
 
 Dieser Ordner nutzt Python, um zwei reproduzierbare Benchmark-Datensaetze als
-Parquet-Dateien zu erzeugen (`aircraft` und `airlines`).
+Parquet-Dateien zu erzeugen (`flights` und `airlines`).
 
 ## Setup
 ```bash
@@ -12,13 +12,14 @@ pip install ./data-gen
 
 ## Generierung
 ```bash
-python data-gen/generate_parquet.py --rows 1000 --seed 42
+python data-gen/generate_parquet.py --rows 1000 --seed 42 --reference-date 2025-12-31
 ```
 
 Optionen:
-- `--rows`: Anzahl Zeilen fuer `aircraft`
+- `--rows`: Anzahl Zeilen fuer `flights`
 - `--airlines`: Anzahl Airline-Zeilen (Join-Zieltabelle)
 - `--seed`: Seed fuer reproduzierbare Daten
+- `--reference-date`: Referenzdatum im Format `YYYY-MM-DD`; alle Flugzeiten liegen strikt davor
 - `--output-dir`: Zielordner (Default: `out/` im `data-gen`-Ordner)
 
 ## Warum `--seed`?
@@ -27,11 +28,13 @@ So bleiben Benchmarks zwischen Pandas, Polars und Tablesaw fair und reproduzierb
 Ein anderer Seed erzeugt andere, aber gleichartig verteilte Daten.
 
 Erzeugte Dateien:
-- `out/aircraft.parquet`
+- `out/flights.parquet`
 - `out/airlines.parquet`
 
-`flights` enthaelt zusaetzlich die Spalte:
-- `flight_distance` (Float64, Kilometer)
+Wichtige Spalten in `flights`:
+- `flight_number` (eindeutig, praefix `FL`)
+- `departure_time` und `arrival_time` (String mit Uhrzeit + Datum)
+- `flight_distance` (Int64, Kilometer)
 
 Join-Schluessel:
-- `aircraft.airline_code` = `airlines.airline_code`
+- `flights.airline_code` = `airlines.airline_code`
