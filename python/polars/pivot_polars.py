@@ -23,7 +23,7 @@ def load_datasets() -> tuple[pl.DataFrame, pl.DataFrame]:
 def pivot_datasets(flights: pl.DataFrame) -> pl.DataFrame:
     return flights.group_by("aircraft_model").agg(
             pl.col("flight_distance").sum().alias("sum_flight_distance")
-    ).sort("aircraft_model")
+    )
 
 if __name__ == "__main__":
     flights_df, airlines_df = load_datasets()

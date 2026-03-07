@@ -11,7 +11,7 @@ DATA_GEN_OUT = BASE_DIR.parent.parent / "data-gen" / "out"
 FLIGHTS_PATH = DATA_GEN_OUT / "flights.parquet"
 AIRLINES_PATH = DATA_GEN_OUT / "airlines.parquet"
 OUT_DIR = BASE_DIR / "out"
-OUT_PATH = OUT_DIR / "pivot.parquet"
+OUT_PATH = OUT_DIR / "pivot_pandas.parquet"
 
 
 def load_datasets() -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -22,7 +22,7 @@ def load_datasets() -> tuple[pd.DataFrame, pd.DataFrame]:
 
 def pivot_datasets(flights: pd.DataFrame) -> pd.DataFrame:
     return (
-        flights.groupby("aircraft_model", as_index=False)["flight_distance"]
+        flights.groupby("aircraft_model", as_index=False, sort=False)["flight_distance"]
         .sum()
         .rename(columns={"flight_distance": "sum_flight_distance"})
     )
