@@ -26,6 +26,10 @@ public class TablesawIO {
     return readParquet(repoRoot.resolve("data-gen/out").resolve(formatRowsLabel(rows) + "Flights.parquet"));
   }
 
+  public Table loadFlightsByLabel(String datasetLabel) {
+    return readParquet(repoRoot.resolve("data-gen/out").resolve(datasetLabel + "Flights.parquet"));
+  }
+
   public Table loadAirlines() {
     return readParquet(repoRoot.resolve("data-gen/out/airlines.parquet"));
   }
