@@ -112,6 +112,7 @@ class GeneratorConfig:
     rows: int
     airlines: int
     seed: int
+    reference_date: date
     output_dir: Path
 
 
@@ -127,6 +128,12 @@ def parse_args() -> GeneratorConfig:
         help="Number of airline rows (distinct airline codes). Defaults to all names in AIRLINE_NAMES.",
     )
     parser.add_argument("--seed", type=int, default=42, help="Random seed.")
+    parser.add_argument(
+        "--reference-date",
+        type=date.fromisoformat,
+        default=date(2025, 12, 31),
+        help="Reference date (YYYY-MM-DD). Generated flights are always strictly before this date.",
+    )
     parser.add_argument(
         "--output-dir",
         type=Path,
@@ -150,15 +157,20 @@ def parse_args() -> GeneratorConfig:
         rows=args.rows,
         airlines=airlines,
         seed=args.seed,
+        reference_date=args.reference_date,
         output_dir=args.output_dir,
     )
 
 
-def random_flight_date(rng: random.Random) -> date:
-    year = rng.randint(2016, 2026)
-    start = date(year, 1, 1)
-    day_offset = rng.randint(0, 364)
-    return start + timedelta(days=day_offset)
+MAX_FLIGHT_DURATION_MINUTES = 720
+
+
+def random_flight_date(rng: random.Random, latest_departure_day: date) -> date:
+    start = date(2016, 1, 1)
+    max_offset = (latest_departure_day - start).days
+    if max_offset < 0:
+        raise ValueError("latest_departure_day must be on or after 2016-01-01")
+    return start + timedelta(days=rng.randint(0, max_offset))
 
 
 def build_airlines(codes: list[int], seed: int) -> pl.DataFrame:
@@ -197,11 +209,13 @@ def arrival_schedule(departure_minutes: int, duration_minutes: int, departure_da
     return arrival_minutes, arrival_day
 
 
-def build_flights(rows: int, airline_codes: list[int], seed: int) -> pl.DataFrame:
+def build_flights(rows: int, airline_codes: list[int], seed: int, reference_date: date) -> pl.DataFrame:
     rng = random.Random(seed)
     flight_numbers = rng.sample(range(100_000, 1_000_000), rows)
     plane_pool_size = max(50, rows // 5)
     msn_to_model: dict[str, str] = {}
+    max_arrival_day_shift = (23 * 60 + 59 + MAX_FLIGHT_DURATION_MINUTES) // (24 * 60)
+    latest_departure_day = reference_date - timedelta(days=max_arrival_day_shift + 1)
 
     records = {
         "flight_number": [],
@@ -217,13 +231,13 @@ def build_flights(rows: int, airline_codes: list[int], seed: int) -> pl.DataFram
     }
 
     for flight_number in flight_numbers:
-        departure_day = random_flight_date(rng)
+        departure_day = random_flight_date(rng, latest_departure_day=latest_departure_day)
         msn = f"MSN{(100_000 + (flight_number % plane_pool_size)):06d}"
         if msn not in msn_to_model:
             msn_to_model[msn] = rng.choice(AIRCRAFT_MODELS)
         departure_airport, arrival_airport = rng.sample(AIRPORT_CODES, 2)
         departure_minutes = random_time_minutes(rng)
-        duration_minutes = rng.randint(50, 720)
+        duration_minutes = rng.randint(50, MAX_FLIGHT_DURATION_MINUTES)
         arrival_minutes, arrival_day = arrival_schedule(departure_minutes, duration_minutes, departure_day)
 
         records["flight_number"].append(f"FL{flight_number}")
@@ -235,8 +249,8 @@ def build_flights(rows: int, airline_codes: list[int], seed: int) -> pl.DataFram
         records["arrival_airport"].append(arrival_airport)
         records["departure_time"].append(format_time(departure_minutes, departure_day))
         records["arrival_time"].append(format_time(arrival_minutes, arrival_day))
-        # Distance in kilometers (float64), loosely correlated with flight duration.
-        records["flight_distance"].append(round(duration_minutes * rng.uniform(9.0, 14.0), 2))
+        # Distance in kilometers (int64), loosely correlated with flight duration.
+        records["flight_distance"].append(int(round(duration_minutes * rng.uniform(9.0, 14.0))))
 
     return pl.DataFrame(records)
 
@@ -251,6 +265,7 @@ def main() -> None:
         rows=config.rows,
         airline_codes=airline_codes,
         seed=config.seed,
+        reference_date=config.reference_date,
     )
 
     config.output_dir.mkdir(parents=True, exist_ok=True)
