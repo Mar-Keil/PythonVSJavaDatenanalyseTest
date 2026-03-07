@@ -3,6 +3,7 @@ package com.tablesaw.benchmark;
 import com.tablesaw.io.TablesawIO;
 import com.tablesaw.logic.TablesawLogic;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -22,15 +23,14 @@ import tech.tablesaw.api.Table;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
-@Warmup(iterations = 3)
-@Measurement(iterations = 5)
+@Warmup(iterations = 1)
+@Measurement(iterations = 2)
 @Fork(value = 1)
 public class TablesawBenchmarks {
   @State(Scope.Benchmark)
   public static class BaseState {
-    
-    @Param({"20000", "100000"/*, "500000", "2500000", "12500000"*/})
-    public String rows;
+    @Param({"25k", "100k", "400k", "1600k", "6400k", "25600k"})
+    public String flightsDataset;
 
     protected final TablesawIO io = new TablesawIO();
     protected final TablesawLogic logic = new TablesawLogic();
@@ -41,10 +41,10 @@ public class TablesawBenchmarks {
     protected Table flights;
     protected Table airlines;
 
-    @Setup(Level.Trial)
+    @Setup(Level.Iteration)
     public void setup() {
-      flights = io.loadFlights(rows);
-      airlines = io.loadAirlines(rows);
+      flights = io.loadFlightsByLabel(flightsDataset);
+      airlines = io.loadAirlines();
     }
   }
 
@@ -58,7 +58,7 @@ public class TablesawBenchmarks {
     private Path outputDir;
     private final AtomicLong sequence = new AtomicLong();
 
-    @Setup(Level.Trial)
+    @Setup(Level.Iteration)
     public void setupWrite() {
       super.setup();
       filtered = logic.filter(flights);
@@ -68,15 +68,15 @@ public class TablesawBenchmarks {
       joined = logic.join(flights, airlines);
       Path cwd = Path.of("").toAbsolutePath().normalize();
       Path repoRoot = cwd.endsWith("java") ? cwd.getParent() : cwd;
-      outputDir = repoRoot.resolve("java/out/jmh-write").resolve(rows);
+      outputDir = repoRoot.resolve("java/out/jmh-write").resolve(flightsDataset);
     }
 
   }
 
   @Benchmark
   public int readDatasets(BaseState state) {
-    Table flights = state.io.loadFlights(state.rows);
-    Table airlines = state.io.loadAirlines(state.rows);
+    Table flights = state.io.loadFlightsByLabel(state.flightsDataset);
+    Table airlines = state.io.loadAirlines();
     return flights.rowCount() + airlines.rowCount();
   }
 
@@ -109,6 +109,7 @@ public class TablesawBenchmarks {
   public int writeFilter(WriteState state) throws IOException {
     Path output = state.outputDir.resolve("filter_" + state.sequence.incrementAndGet() + ".parquet");
     state.io.writeParquet(state.filtered, output);
+    cleanupWrittenFile(output);
     return state.filtered.rowCount();
   }
 
@@ -116,6 +117,7 @@ public class TablesawBenchmarks {
   public int writePivot(WriteState state) throws IOException {
     Path output = state.outputDir.resolve("pivot_" + state.sequence.incrementAndGet() + ".parquet");
     state.io.writeParquet(state.pivoted, output);
+    cleanupWrittenFile(output);
     return state.pivoted.rowCount();
   }
 
@@ -123,6 +125,7 @@ public class TablesawBenchmarks {
   public int writeGroupCount(WriteState state) throws IOException {
     Path output = state.outputDir.resolve("groupCount_" + state.sequence.incrementAndGet() + ".parquet");
     state.io.writeParquet(state.groupedCount, output);
+    cleanupWrittenFile(output);
     return state.groupedCount.rowCount();
   }
 
@@ -130,6 +133,7 @@ public class TablesawBenchmarks {
   public int writeSort(WriteState state) throws IOException {
     Path output = state.outputDir.resolve("sort_" + state.sequence.incrementAndGet() + ".parquet");
     state.io.writeParquet(state.sorted, output);
+    cleanupWrittenFile(output);
     return state.sorted.rowCount();
   }
 
@@ -137,6 +141,13 @@ public class TablesawBenchmarks {
   public int writeJoin(WriteState state) throws IOException {
     Path output = state.outputDir.resolve("join_" + state.sequence.incrementAndGet() + ".parquet");
     state.io.writeParquet(state.joined, output);
+    cleanupWrittenFile(output);
     return state.joined.rowCount();
+  }
+
+  private void cleanupWrittenFile(Path output) throws IOException {
+    Files.deleteIfExists(output);
+    Path crcPath = output.resolveSibling("." + output.getFileName() + ".crc");
+    Files.deleteIfExists(crcPath);
   }
 }
