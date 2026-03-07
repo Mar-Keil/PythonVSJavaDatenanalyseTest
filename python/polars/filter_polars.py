@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""Minimal dataset loader for Polars."""
 
 from __future__ import annotations
 
