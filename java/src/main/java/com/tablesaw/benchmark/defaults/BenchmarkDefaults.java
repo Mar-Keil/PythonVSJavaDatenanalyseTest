@@ -23,7 +23,7 @@ public abstract class BenchmarkDefaults {
   private final Path dataOutDir;
   private final Path writeRootDir;
 
-  @Param({"25k", "100k", "400k", "1600k", "6400k"/*, "25600k"*/})
+  @Param({"25k", "100k", "400k", "1600k", "6400k"})
   protected String flightsDataset;
 
   public BenchmarkDefaults() {
