@@ -234,7 +234,10 @@ def arrival_schedule(departure_minutes: int, duration_minutes: int, departure_da
 
 def build_flights(rows: int, airline_codes: list[int], seed: int, reference_date: date) -> pl.DataFrame:
     rng = random.Random(seed)
-    flight_numbers = range(FLIGHT_NUMBER_MIN, FLIGHT_NUMBER_MIN + rows)
+    flight_number_space = range(FLIGHT_NUMBER_MIN, FLIGHT_NUMBER_MAX_EXCLUSIVE)
+    if rows > len(flight_number_space):
+        raise ValueError("rows exceeds available unique flight number space")
+    flight_numbers = rng.sample(flight_number_space, rows)
     plane_pool_size = max(50, rows // 5)
     msn_to_model: dict[str, str] = {}
     max_arrival_day_shift = (23 * 60 + 59 + MAX_FLIGHT_DURATION_MINUTES) // (24 * 60)
