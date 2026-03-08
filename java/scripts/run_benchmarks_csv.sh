@@ -25,7 +25,11 @@ java -jar "$JAR_PATH" \
   -rff "$READ_CSV"
 
 java -jar "$JAR_PATH" \
-  com.tablesaw.benchmark.RunWriteBenchmarks \
+  com.tablesaw.benchmark.FilterBenchmarks \
+  com.tablesaw.benchmark.PivotBenchmarks \
+  com.tablesaw.benchmark.GroupCountBenchmarks \
+  com.tablesaw.benchmark.SortBenchmarks \
+  com.tablesaw.benchmark.JoinBenchmarks \
   -rf csv \
   -rff "$WRITE_CSV"
 
