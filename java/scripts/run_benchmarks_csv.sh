@@ -4,11 +4,17 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 JAR_PATH="$ROOT_DIR/target/java-0.1.0-SNAPSHOT-benchmarks.jar"
 OUT_DIR="$ROOT_DIR/out/jmh-results"
-OUT_CSV="$OUT_DIR/results.csv"
-READ_CSV="$OUT_DIR/read_results.csv"
-WRITE_CSV="$OUT_DIR/run_write_results.csv"
 
 mkdir -p "$OUT_DIR"
+
+RUN_NUMBER=1
+while [[ -f "$OUT_DIR/results${RUN_NUMBER}.csv" ]]; do
+  RUN_NUMBER=$((RUN_NUMBER + 1))
+done
+
+OUT_CSV="$OUT_DIR/results${RUN_NUMBER}.csv"
+READ_CSV="$OUT_DIR/read_results_${RUN_NUMBER}.csv"
+WRITE_CSV="$OUT_DIR/run_write_results_${RUN_NUMBER}.csv"
 
 if [[ ! -f "$JAR_PATH" ]]; then
   echo "Missing benchmark jar: $JAR_PATH"
@@ -20,16 +26,12 @@ JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 17)}"
 PATH="$JAVA_HOME/bin:$PATH"
 
 java -jar "$JAR_PATH" \
-  com.tablesaw.benchmark.ReadBenchmarks \
+  "com.tablesaw.benchmark.read.*" \
   -rf csv \
   -rff "$READ_CSV"
 
 java -jar "$JAR_PATH" \
-  com.tablesaw.benchmark.FilterBenchmarks \
-  com.tablesaw.benchmark.PivotBenchmarks \
-  com.tablesaw.benchmark.GroupCountBenchmarks \
-  com.tablesaw.benchmark.SortBenchmarks \
-  com.tablesaw.benchmark.JoinBenchmarks \
+  "com.tablesaw.benchmark.run.*" \
   -rf csv \
   -rff "$WRITE_CSV"
 
