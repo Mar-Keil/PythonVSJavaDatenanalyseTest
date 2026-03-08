@@ -1,5 +1,6 @@
-package com.tablesaw.benchmark;
+package com.tablesaw.benchmark.read;
 
+import com.tablesaw.benchmark.defaults.BenchmarkDefaults;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;

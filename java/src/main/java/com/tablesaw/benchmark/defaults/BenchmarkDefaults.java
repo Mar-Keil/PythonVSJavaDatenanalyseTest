@@ -1,4 +1,4 @@
-package com.tablesaw.benchmark;
+package com.tablesaw.benchmark.defaults;
 
 import com.sun.management.OperatingSystemMXBean;
 import com.tablesaw.io.TablesawIO;
