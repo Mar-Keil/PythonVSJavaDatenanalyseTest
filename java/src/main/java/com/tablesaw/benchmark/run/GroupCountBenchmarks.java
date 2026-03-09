@@ -34,5 +34,4 @@ public class GroupCountBenchmarks extends BenchmarkDefaults {
     io.writeParquet(groupedFlights, output);
     return groupedFlights.rowCount();
   }
-
 }

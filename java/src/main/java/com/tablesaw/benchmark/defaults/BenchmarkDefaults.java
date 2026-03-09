@@ -19,6 +19,9 @@ public abstract class BenchmarkDefaults {
   protected final TablesawIO io;
   protected final TablesawLogic logic;
   protected final OperatingSystemMXBean os;
+  private final long initUsedMb;
+  private long realBefore;
+  private long cpuBefore;
 
   private final Path dataOutDir;
   private final Path writeRootDir;
@@ -30,6 +33,7 @@ public abstract class BenchmarkDefaults {
     this.io = new TablesawIO();
     this.logic = new TablesawLogic();
     this.os = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+    this.initUsedMb = usedHeapMb();
 
     Path cwd = Path.of("").toAbsolutePath().normalize();
     Path repoRoot = cwd.endsWith("java") ? cwd.getParent() : cwd;
@@ -47,6 +51,21 @@ public abstract class BenchmarkDefaults {
 
   protected Path resolveWriteOutputDir(String benchmarkName) {
     return writeRootDir.resolve(benchmarkName);
+  }
+
+  @Setup(Level.Iteration)
+  public void setupIterationMetrics() {
+    realBefore = System.nanoTime();
+    cpuBefore = os.getProcessCpuTime();
+  }
+
+  @TearDown(Level.Iteration)
+  public void tearDownIterationMetrics(ExtraMetrics metrics) {
+    long cpuAfter = os.getProcessCpuTime();
+    long realAfter = System.nanoTime();
+
+    metrics.RAM = usedHeapMb() - initUsedMb;
+    metrics.CPU = (double) (cpuAfter - cpuBefore) / (double) (realAfter - realBefore);
   }
 
   protected long usedHeapMb() {
