@@ -15,11 +15,11 @@ BASE_DIR = Path(__file__).resolve().parent
 FLIGHT_NUMBER_MIN = 10_000_000
 FLIGHT_NUMBER_MAX_EXCLUSIVE = 100_000_000
 BENCHMARK_DATASET_ROWS = [
-    25_000,
-    100_000,
-    400_000,
-    1_600_000,
-    6_400_000
+    50_000,
+    200_000,
+    800_000,
+    3_200_000,
+    12_800_000
 ]
 AIRCRAFT_MODELS = [
     "A220-100",
