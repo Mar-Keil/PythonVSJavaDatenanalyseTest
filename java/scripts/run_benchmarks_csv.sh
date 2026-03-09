@@ -24,13 +24,26 @@ fi
 
 JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 17)}"
 PATH="$JAVA_HOME/bin:$PATH"
+JAVA_CMD=("$JAVA_HOME/bin/java")
 
-java -jar "$JAR_PATH" \
+if [[ -n "${JAVA_XMS:-}" ]]; then
+  JAVA_CMD+=("-Xms$JAVA_XMS")
+fi
+
+if [[ -n "${JAVA_XMX:-}" ]]; then
+  JAVA_CMD+=("-Xmx$JAVA_XMX")
+fi
+
+if [[ ${#JAVA_CMD[@]} -gt 1 ]]; then
+  echo "Using JVM heap options: ${JAVA_CMD[*]:1}"
+fi
+
+"${JAVA_CMD[@]}" -jar "$JAR_PATH" \
   "com.tablesaw.benchmark.read.*" \
   -rf csv \
   -rff "$READ_CSV"
 
-java -jar "$JAR_PATH" \
+"${JAVA_CMD[@]}" -jar "$JAR_PATH" \
   "com.tablesaw.benchmark.run.*" \
   -rf csv \
   -rff "$WRITE_CSV"
