@@ -111,7 +111,7 @@ for row in rows[1:]:
         filtered_rows.append(row)
         continue
 
-    if benchmark.endswith(":RAM"):
+    if benchmark.endswith(":AvgRAM"):
         samples_raw = row[samples_idx]
         try:
             samples = float(samples_raw)
@@ -121,6 +121,11 @@ for row in rows[1:]:
 
         if math.isfinite(score) and samples > 0:
             row[score_idx] = format_decimal(score / samples)
+        row[unit_idx] = "MB/iter"
+        filtered_rows.append(row)
+        continue
+
+    if benchmark.endswith(":PeakRAM"):
         row[unit_idx] = "MB/iter"
 
     filtered_rows.append(row)

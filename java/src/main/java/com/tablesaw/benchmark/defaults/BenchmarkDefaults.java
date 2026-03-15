@@ -32,6 +32,7 @@ public abstract class BenchmarkDefaults {
 
   private final AtomicLong rssSumMb;
   private final AtomicLong rssSampleCount;
+  private final AtomicLong peakRssMb;
   private final AtomicBoolean rssSamplerRunning;
   private Thread rssSamplerThread;
 
@@ -48,6 +49,7 @@ public abstract class BenchmarkDefaults {
     this.processId = ProcessHandle.current().pid();
     this.rssSumMb = new AtomicLong();
     this.rssSampleCount = new AtomicLong();
+    this.peakRssMb = new AtomicLong();
     this.rssSamplerRunning = new AtomicBoolean(false);
 
     Path cwd = Path.of("").toAbsolutePath().normalize();
@@ -72,6 +74,7 @@ public abstract class BenchmarkDefaults {
   public void setupIterationMetrics() {
     rssSumMb.set(0L);
     rssSampleCount.set(0L);
+    peakRssMb.set(0L);
 
     rssSamplerRunning.set(true);
     rssSamplerThread = createRssSamplerThread();
@@ -86,16 +89,20 @@ public abstract class BenchmarkDefaults {
     long realAfter = System.nanoTime();
     stopRssSampler();
 
-    metrics.RAM = rssSumMb.get() / rssSampleCount.get();
+    metrics.AvgRAM = (double) rssSumMb.get() / rssSampleCount.get();
+    metrics.PeakRAM = peakRssMb.get();
     metrics.CPU = (double) (cpuAfter - cpuBefore) / (double) (realAfter - realBefore);
   }
 
+  @SuppressWarnings("BusyWait")
   private Thread createRssSamplerThread() {
     Thread thread = new Thread(
         () -> {
           while (rssSamplerRunning.get()) {
-            rssSumMb.addAndGet(readProcessRssMb());
-              rssSampleCount.incrementAndGet();
+            long currentRssMb = readProcessRssMb();
+            rssSumMb.addAndGet(currentRssMb);
+            rssSampleCount.incrementAndGet();
+            peakRssMb.accumulateAndGet(currentRssMb, Math::max);
 
             try {
               Thread.sleep(10L);
