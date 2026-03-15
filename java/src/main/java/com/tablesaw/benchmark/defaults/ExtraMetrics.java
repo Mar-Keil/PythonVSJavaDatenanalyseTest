@@ -8,5 +8,5 @@ import org.openjdk.jmh.annotations.State;
 @State(Scope.Thread)
 public class ExtraMetrics {
   public double CPU = 0;
-  public long RAM = 0;
+  public double RAM = 0;
 }
