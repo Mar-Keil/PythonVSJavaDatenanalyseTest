@@ -1,18 +1,35 @@
 from __future__ import annotations
 
+from threading import Event, Timer
 from time import perf_counter
 
+from polars.benchmarking.default.default_values import BENCHMARK_DURATION_SECONDS
 from polars.logic.logic import read_parquet
 
 
 class ReadBenchmark:
-    def measure_read_time(self, dataset_path, airlines_path) -> float:
-        start_time = perf_counter()
+    def measure_read_time(
+        self,
+        dataset_path,
+        airlines_path,
+        duration_seconds: float = BENCHMARK_DURATION_SECONDS,
+    ) -> list[float]:
+        stop_event = Event()
+        timer = Timer(duration_seconds, stop_event.set)
+        durations: list[float] = []
 
-        flights = read_parquet(dataset_path)
-        airlines = read_parquet(airlines_path)
+        timer.start()
+        try:
+            while not stop_event.is_set():
+                start_time = perf_counter()
 
-        end_time = perf_counter()
+                flights = read_parquet(dataset_path)
+                airlines = read_parquet(airlines_path)
 
-        return end_time - start_time
+                end_time = perf_counter()
 
+                durations.append(end_time - start_time)
+        finally:
+            timer.cancel()
+
+        return durations
