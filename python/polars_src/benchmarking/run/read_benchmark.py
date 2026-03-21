@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from time import perf_counter
 
-from polars.benchmarking.default.default_functions import write_result
-from polars.benchmarking.default.default_values import BENCHMARK_ITERATIONS
-from polars.benchmarking.default.default_values import PARAM
-from polars.logic.logic import read_parquet
+from polars_src.benchmarking.default.default_functions import write_result
+from polars_src.benchmarking.default.default_values import BENCHMARK_ITERATIONS
+from polars_src.benchmarking.default.default_values import PARAM
+from polars_src.logic.logic import read_parquet
 
 
 class ReadBenchmark:

@@ -1,6 +1,6 @@
 import csv
 
-from polars.benchmarking.default.default_values import POLARS_OUT_DIR
+from polars_src.benchmarking.default.default_values import POLARS_OUT_DIR
 
 CSV_PATH = POLARS_OUT_DIR / "benchmark_results.csv"
 
