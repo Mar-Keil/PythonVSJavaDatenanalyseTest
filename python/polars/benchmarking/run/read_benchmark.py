@@ -8,12 +8,17 @@ from polars.logic.logic import read_parquet
 
 
 class ReadBenchmark:
-    def measure_read_time(
+    def measure(
         self,
-        dataset_path,
-        airlines_path,
-        duration_seconds: float = BENCHMARK_DURATION_SECONDS,
-    ) -> list[float]:
+        airlines_path
+    ) -> none:
+
+
+
+
+
+
+
         stop_event = Event()
         timer = Timer(duration_seconds, stop_event.set)
         durations: list[float] = []
