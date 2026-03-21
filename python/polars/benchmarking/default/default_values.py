@@ -15,9 +15,9 @@ BENCHMARK_DURATION_SECONDS = 10
 AIRLINES_INPUT_PATH = DATA_GEN_OUT_DIR / "airlines.parquet"
 
 PARAM = [
-    ("50k", DATA_GEN_OUT_DIR / "50kFlights.parquet"),
-    ("200k", DATA_GEN_OUT_DIR / "200kFlights.parquet"),
-    ("800k", DATA_GEN_OUT_DIR / "800kFlights.parquet"),
-    ("3200k", DATA_GEN_OUT_DIR / "3200kFlights.parquet"),
-    ("12800k", DATA_GEN_OUT_DIR / "12800kFlights.parquet"),
-]
+    DATA_GEN_OUT_DIR / "50kFlights.parquet",
+    DATA_GEN_OUT_DIR / "200kFlights.parquet",
+    DATA_GEN_OUT_DIR / "800kFlights.parquet",
+    DATA_GEN_OUT_DIR / "3200kFlights.parquet",
+    DATA_GEN_OUT_DIR / "12800kFlights.parquet",
+    ]
