@@ -10,8 +10,8 @@ from polars.logic.logic import read_parquet
 
 class ReadBenchmark:
     def run(self) -> None:
-        time = 0.0
         for path in PARAM:
+            time = 0.0
             for i in range(BENCHMARK_ITERATIONS):
                 start_time = perf_counter()
 
