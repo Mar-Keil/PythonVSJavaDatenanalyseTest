@@ -11,6 +11,8 @@ POLARS_OUT_DIR = BASE_DIR / "out"
 
 AIRLINES_INPUT_PATH = DATA_GEN_OUT_DIR / "airlines.parquet"
 
+BENCHMARK_ITERATIONS = 7
+
 INPUT_PATHS = [
     ("50k", DATA_GEN_OUT_DIR / "50kFlights.parquet"),
     ("200k", DATA_GEN_OUT_DIR / "200kFlights.parquet"),
