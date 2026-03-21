@@ -5,6 +5,7 @@ from time import perf_counter
 from polars_src.benchmarking.default.default_functions import write_result
 from polars_src.benchmarking.default.default_values import BENCHMARK_ITERATIONS
 from polars_src.benchmarking.default.default_values import PARAM
+from polars_src.benchmarking.default.default_values import AIRLINES_INPUT_PATH
 from polars_src.logic.logic import read_parquet
 
 
@@ -16,6 +17,7 @@ class ReadBenchmark:
                 start_time = perf_counter()
 
                 read_parquet(path)
+                read_parquet(AIRLINES_INPUT_PATH)
 
                 time += perf_counter() - start_time
 
