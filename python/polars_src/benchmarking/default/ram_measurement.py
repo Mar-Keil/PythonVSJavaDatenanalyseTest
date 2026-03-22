@@ -5,7 +5,7 @@ from time import sleep
 from psutil import Process
 
 from polars_src.benchmarking.default.default_functions import write_result
-
+from polars_src.benchmarking.default.default_values import TURN_IN_MB
 
 class RamMeasurement:
     def __init__(self) -> None:
@@ -48,5 +48,5 @@ class RamMeasurement:
     def write_results(self, benchmark_size: str, method: str) -> None:
         rss_avg = self.rss_sum / self.measurements
 
-        write_result(benchmark_size, method, "RAM_AVG", rss_avg, "bytes")
-        write_result(benchmark_size, method, "RAM_MAX", self.rss_max, "bytes")
+        write_result(benchmark_size, method, "RAM_AVG", rss_avg / TURN_IN_MB, "MiB")
+        write_result(benchmark_size, method, "RAM_MAX", self.rss_max / TURN_IN_MB, "MiB")
