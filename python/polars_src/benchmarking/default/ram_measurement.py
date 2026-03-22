@@ -50,3 +50,5 @@ class RamMeasurement:
 
         write_result(benchmark_size, method, "RAM_AVG", rss_avg / TURN_IN_MB, "MiB")
         write_result(benchmark_size, method, "RAM_MAX", self.rss_max / TURN_IN_MB, "MiB")
+
+        self.reset()
