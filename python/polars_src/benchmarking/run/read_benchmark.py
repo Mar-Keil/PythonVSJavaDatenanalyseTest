@@ -18,6 +18,8 @@ class ReadBenchmark:
         for path in PARAM:
 
             for _ in range(BENCHMARK_ITERATIONS):
+
+                # Set up iteration
                 invocation_loop = True
 
                 def stop_invocation() -> None:
@@ -30,15 +32,22 @@ class ReadBenchmark:
 
                 while invocation_loop:
 
+                    # Set up invocation
                     time.start()
 
-                    read_parquet(path)
-                    read_parquet(AIRLINES_INPUT_PATH)
+                    # Run benchmark invocation
+                    flights = read_parquet(path)
+                    airlines = read_parquet(AIRLINES_INPUT_PATH)
 
+                    # Tear down invocation
                     time.stop()
+                    del flights
+                    del airlines
 
+                # Tear down iteration
                 timer.cancel()
                 ram.stop()
 
+            
             time.write_results(path.stem.replace("Flights", ""), "Read")
             ram.write_results(path.stem.replace("Flights", ""), "Read")
