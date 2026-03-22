@@ -43,5 +43,7 @@ Beispiel-Aufgaben:
 ## Hinweise
 - Java laeuft ueber `mvn -f java/pom.xml package`.
 - Python-Abhaengigkeiten sollen in `python/pyproject.toml` definiert werden.
+- Reproduzierbare Python-Umgebung: `python3 -m venv python/.venv && python/.venv/bin/pip install -e ./python`
+- Das `venv` selbst sollte nicht versioniert werden. Fuer Reproduzierbarkeit gehoeren die Abhaengigkeiten und Startbefehle ins Repository, nicht die plattformspezifischen Dateien aus `.venv/`.
 - Data-Generator-Abhaengigkeiten sind in `data-gen/pyproject.toml` definiert.
 - Datensatz-Generierung: `python data-gen/generate_parquet.py --rows 1000000 --seed 42`
