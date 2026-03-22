@@ -11,17 +11,17 @@ class RamMeasurement:
     def __init__(self) -> None:
         self.process = Process()
         self.running = False
-        self.measurements = 0
+        self.samples = 0
         self.rss_sum = 0
         self.rss_max = 0
         self.thread: Thread | None = None
 
     def reset(self) -> None:
-        self.measurements = 0
+        self.samples = 0
         self.rss_sum = 0
         self.rss_max = 0
 
-    def continue_ram(self) -> None:
+    def start(self) -> None:
         self.running = True
         self.thread = Thread(target=self.measure)
         self.thread.start()
@@ -29,7 +29,7 @@ class RamMeasurement:
     def measure(self) -> None:
         while self.running:
             rss = self.process.memory_info().rss
-            self.measurements += 1
+            self.samples += 1
             self.rss_sum += rss
 
             if rss > self.rss_max:
@@ -37,16 +37,13 @@ class RamMeasurement:
 
             sleep(0.01)
 
-    def pause(self) -> None:
+    def stop(self) -> None:
         self.running = False
         self.thread.join()
         self.thread = None
 
-    def stop(self) -> None:
-        self.pause()
-
     def write_results(self, benchmark_size: str, method: str) -> None:
-        rss_avg = self.rss_sum / self.measurements
+        rss_avg = self.rss_sum / self.samples
 
         write_result(benchmark_size, method, "RAM_AVG", rss_avg / TURN_IN_MB, "MiB")
         write_result(benchmark_size, method, "RAM_MAX", self.rss_max / TURN_IN_MB, "MiB")

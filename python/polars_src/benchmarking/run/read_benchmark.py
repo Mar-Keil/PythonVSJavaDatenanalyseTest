@@ -26,7 +26,7 @@ class ReadBenchmark:
 
                 timer = Timer(BENCHMARK_DURATION_SECONDS, stop_invocation)
                 timer.start()
-                ram.continue_ram()
+                ram.start()
 
                 while invocation_loop:
 
@@ -38,7 +38,7 @@ class ReadBenchmark:
                     time.stop()
 
                 timer.cancel()
-                ram.pause()
+                ram.stop()
 
             time.write_results(path.stem.replace("Flights", ""), "Read")
             ram.write_results(path.stem.replace("Flights", ""), "Read")
