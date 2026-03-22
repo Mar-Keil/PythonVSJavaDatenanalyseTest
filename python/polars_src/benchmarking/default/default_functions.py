@@ -21,3 +21,4 @@ def write_result(
     with CSV_PATH.open("a", newline="", encoding="utf-8") as csv_file:
         writer = csv.writer(csv_file)
         writer.writerow([benchmark_size, method, category, score, unit])
+
