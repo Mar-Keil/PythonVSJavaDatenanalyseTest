@@ -22,3 +22,4 @@ def write_result(
         writer = csv.writer(csv_file)
         writer.writerow([benchmark_size, method, category, score, unit])
 
+    print(f"[CSV] {benchmark_size} | {method} | {category} = {score} {unit}")
