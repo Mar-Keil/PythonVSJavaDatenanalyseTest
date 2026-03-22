@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from time import perf_counter
+import time
 
 from polars_src.benchmarking.default.default_functions import write_result
 from polars_src.benchmarking.default.default_values import BENCHMARK_ITERATIONS
@@ -14,11 +14,15 @@ class ReadBenchmark:
         for path in PARAM:
             time = 0.0
             for i in range(BENCHMARK_ITERATIONS):
+
+                #Setup
                 start_time = perf_counter()
 
+                #Benchmark
                 read_parquet(path)
                 read_parquet(AIRLINES_INPUT_PATH)
 
+                #Teardown
                 time += perf_counter() - start_time
 
             time = time / BENCHMARK_ITERATIONS
