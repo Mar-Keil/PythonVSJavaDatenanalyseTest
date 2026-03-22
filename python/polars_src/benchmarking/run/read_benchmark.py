@@ -9,14 +9,17 @@ from polars_src.benchmarking.default.default_values import AIRLINES_INPUT_PATH
 from polars_src.benchmarking.default.default_values import BENCHMARK_ITERATIONS
 from polars_src.benchmarking.default.default_values import BENCHMARK_DURATION_SECONDS
 from polars_src.benchmarking.default.default_values import PARAM
+from polars_src.benchmarking.default.ram_measurement import RamMeasurement
 from polars_src.logic.logic import read_parquet
 
 
 class ReadBenchmark:
     def run(self) -> None:
+        ram = RamMeasurement()
         for path in PARAM:
             time = 0.0
             cpu = 0.0
+            ram.reset()
 
             for i in range(BENCHMARK_ITERATIONS):
                 invocations = 0
@@ -30,6 +33,7 @@ class ReadBenchmark:
 
                 timer = Timer(BENCHMARK_DURATION_SECONDS, stop_invocation)
                 timer.start()
+                ram.continue_ram()
 
                 while invocation_loop:
                     invocations += 1
@@ -47,13 +51,14 @@ class ReadBenchmark:
                     invocation_cpu_time += end_cpu - start_cpu
 
                 timer.cancel()
+                ram.pause()
 
-                if invocations > 0 and invocation_time > 0:
-                    time += invocation_time / invocations
-                    cpu += invocation_cpu_time / invocation_time
+                time += invocation_time / invocations
+                cpu += invocation_cpu_time / invocation_time
 
             time = time / BENCHMARK_ITERATIONS
             cpu = cpu / BENCHMARK_ITERATIONS
 
             write_result(path.stem.replace("Flights", ""), "Read", "Time", time, "s/op")
             write_result(path.stem.replace("Flights", ""), "Read", "CPU", cpu, "ratio/op")
+            ram.write_results(path.stem.replace("Flights", ""), "Read")
