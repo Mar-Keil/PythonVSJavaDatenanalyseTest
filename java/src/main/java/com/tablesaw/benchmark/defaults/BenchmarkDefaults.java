@@ -3,13 +3,8 @@ package com.tablesaw.benchmark.defaults;
 import com.sun.management.OperatingSystemMXBean;
 import com.tablesaw.io.TablesawIO;
 import com.tablesaw.logic.TablesawLogic;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Path;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.TimeUnit;
 import org.openjdk.jmh.annotations.*;
 
@@ -28,14 +23,6 @@ public abstract class BenchmarkDefaults {
   private long realBefore;
   private long cpuBefore;
 
-  private final long processId;
-
-  private final AtomicLong rssSumMb;
-  private final AtomicLong rssSampleCount;
-  private final AtomicLong peakRssMb;
-  private final AtomicBoolean rssSamplerRunning;
-  private Thread rssSamplerThread;
-
   private final Path dataOutDir;
   private final Path writeRootDir;
 
@@ -46,11 +33,6 @@ public abstract class BenchmarkDefaults {
     this.io = new TablesawIO();
     this.logic = new TablesawLogic();
     this.os = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-    this.processId = ProcessHandle.current().pid();
-    this.rssSumMb = new AtomicLong();
-    this.rssSampleCount = new AtomicLong();
-    this.peakRssMb = new AtomicLong();
-    this.rssSamplerRunning = new AtomicBoolean(false);
 
     Path cwd = Path.of("").toAbsolutePath().normalize();
     Path repoRoot = cwd.endsWith("java") ? cwd.getParent() : cwd;
@@ -72,13 +54,6 @@ public abstract class BenchmarkDefaults {
 
   @Setup(Level.Iteration)
   public void setupIterationMetrics() {
-    rssSumMb.set(0L);
-    rssSampleCount.set(0L);
-    peakRssMb.set(0L);
-
-    rssSamplerRunning.set(true);
-    rssSamplerThread = createRssSamplerThread();
-    rssSamplerThread.start();
     realBefore = System.nanoTime();
     cpuBefore = os.getProcessCpuTime();
   }
@@ -87,73 +62,6 @@ public abstract class BenchmarkDefaults {
   public void tearDownIterationMetrics(ExtraMetrics metrics) {
     long cpuAfter = os.getProcessCpuTime();
     long realAfter = System.nanoTime();
-    stopRssSampler();
-
-    metrics.AvgRAM = (double) rssSumMb.get() / rssSampleCount.get();
-    metrics.PeakRAM = peakRssMb.get();
     metrics.CPU = (double) (cpuAfter - cpuBefore) / (double) (realAfter - realBefore);
-  }
-
-  @SuppressWarnings("BusyWait")
-  private Thread createRssSamplerThread() {
-    Thread thread = new Thread(
-        () -> {
-          while (rssSamplerRunning.get()) {
-            long currentRssMb = readProcessRssMb();
-            rssSumMb.addAndGet(currentRssMb);
-            rssSampleCount.incrementAndGet();
-            peakRssMb.accumulateAndGet(currentRssMb, Math::max);
-
-            try {
-              Thread.sleep(10L);
-            } catch (InterruptedException e) {
-              Thread.currentThread().interrupt();
-              return;
-            }
-          }
-        },
-        "jmh-rss-sampler");
-    thread.setDaemon(true);
-    return thread;
-  }
-
-  private void stopRssSampler() {
-    rssSamplerRunning.set(false);
-
-    if (rssSamplerThread == null) {
-      return;
-    }
-
-    rssSamplerThread.interrupt();
-
-    try {
-      rssSamplerThread.join();
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new IllegalStateException("Interrupted while stopping RSS sampler", e);
-    } finally {
-      rssSamplerThread = null;
-    }
-  }
-
-  private long readProcessRssMb() {
-    try {
-      Process process = new ProcessBuilder("ps", "-o", "rss=", "-p", Long.toString(processId)).start();
-      try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-        String rssLine = reader.readLine();
-        int exitCode = process.waitFor();
-
-        if (exitCode != 0 || rssLine == null || rssLine.isBlank()) {
-          throw new IllegalStateException("Unable to read RSS for process " + processId);
-        }
-
-        return Long.parseLong(rssLine.trim()) / 1024L;
-      }
-    } catch (IOException | InterruptedException e) {
-      if (e instanceof InterruptedException) {
-        Thread.currentThread().interrupt();
-      }
-      throw new IllegalStateException("Failed to read RSS via ps", e);
-    }
   }
 }

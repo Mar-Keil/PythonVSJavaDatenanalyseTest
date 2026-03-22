@@ -6,8 +6,6 @@ import tempfile
 
 NORMALIZED_COUNTER_UNITS = {
     ":CPU": "ratio/iter",
-    ":AvgRAM": "MB/iter",
-    ":PeakRAM": "MB/iter",
 }
 
 
