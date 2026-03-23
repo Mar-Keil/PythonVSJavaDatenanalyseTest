@@ -17,7 +17,7 @@ public class FilterBenchmarks extends BenchmarkDefaults {
 
   @Setup(Level.Trial)
   public void setupTrial() {
-    rawFlights = io.readParquet(resolveFlightsPath(flightsDataset));
+    rawFlights = logic.readParquet(resolveFlightsPath(flightsDataset));
     filteredFlights = logic.filter(rawFlights);
     outputDir = resolveWriteOutputDir("filter");
   }
@@ -31,6 +31,6 @@ public class FilterBenchmarks extends BenchmarkDefaults {
   @Benchmark
   public void writeFilter() throws IOException {
     Path output = outputDir.resolve(flightsDataset + "Filter.parquet");
-    io.writeParquet(filteredFlights, output);
+    logic.writeParquet(filteredFlights, output);
   }
 }

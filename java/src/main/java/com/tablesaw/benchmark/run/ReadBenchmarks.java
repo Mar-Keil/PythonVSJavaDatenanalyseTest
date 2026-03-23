@@ -1,4 +1,4 @@
-package com.tablesaw.benchmark.read;
+package com.tablesaw.benchmark.run;
 
 import com.tablesaw.benchmark.defaults.BenchmarkDefaults;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -11,8 +11,8 @@ public class ReadBenchmarks extends BenchmarkDefaults {
 
   @Benchmark
   public int readDatasets() {
-    Table flights = io.readParquet(resolveFlightsPath(flightsDataset));
-    Table airlines = io.readParquet(resolveAirlinesPath());
+    Table flights = logic.readParquet(resolveFlightsPath(flightsDataset));
+    Table airlines = logic.readParquet(resolveAirlinesPath());
     return flights.rowCount() + airlines.rowCount();
   }
 }

@@ -17,7 +17,7 @@ public class GroupCountBenchmarks extends BenchmarkDefaults {
   
   @Setup(Level.Trial)
   public void setupTrial() {
-    rawFlights = io.readParquet(resolveFlightsPath(flightsDataset));
+    rawFlights = logic.readParquet(resolveFlightsPath(flightsDataset));
     groupedFlights = logic.groupCount(rawFlights);
     outputDir = resolveWriteOutputDir("groupCount");
   }
@@ -31,7 +31,7 @@ public class GroupCountBenchmarks extends BenchmarkDefaults {
   @Benchmark
   public int writeGroupCount() throws IOException {
     Path output = outputDir.resolve(flightsDataset + "GroupCount.parquet");
-    io.writeParquet(groupedFlights, output);
+    logic.writeParquet(groupedFlights, output);
     return groupedFlights.rowCount();
   }
 }

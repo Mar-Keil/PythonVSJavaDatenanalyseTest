@@ -17,7 +17,7 @@ public class SortBenchmarks extends BenchmarkDefaults {
   
   @Setup(Level.Trial)
   public void setupTrial() {
-    rawFlights = io.readParquet(resolveFlightsPath(flightsDataset));
+    rawFlights = logic.readParquet(resolveFlightsPath(flightsDataset));
     sortedFlights = logic.sort(rawFlights);
     outputDir = resolveWriteOutputDir("sort");
   }
@@ -31,7 +31,7 @@ public class SortBenchmarks extends BenchmarkDefaults {
   @Benchmark
   public int writeSort() throws IOException {
     Path output = outputDir.resolve(flightsDataset + "Sort.parquet");
-    io.writeParquet(sortedFlights, output);
+    logic.writeParquet(sortedFlights, output);
     return sortedFlights.rowCount();
   }
 

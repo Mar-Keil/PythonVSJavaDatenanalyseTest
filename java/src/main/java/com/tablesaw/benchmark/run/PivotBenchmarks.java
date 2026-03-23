@@ -17,7 +17,7 @@ public class PivotBenchmarks extends BenchmarkDefaults {
   
   @Setup(Level.Trial)
   public void setupTrial() {
-    rawFlights = io.readParquet(resolveFlightsPath(flightsDataset));
+    rawFlights = logic.readParquet(resolveFlightsPath(flightsDataset));
     pivotedFlights = logic.pivot(rawFlights);
     outputDir = resolveWriteOutputDir("pivot");
   }
@@ -31,7 +31,7 @@ public class PivotBenchmarks extends BenchmarkDefaults {
   @Benchmark
   public int writePivot() throws IOException {
     Path output = outputDir.resolve(flightsDataset + "Pivot.parquet");
-    io.writeParquet(pivotedFlights, output);
+    logic.writeParquet(pivotedFlights, output);
     return pivotedFlights.rowCount();
   }
 

@@ -1,7 +1,6 @@
 package com.tablesaw.benchmark.defaults;
 
 import com.sun.management.OperatingSystemMXBean;
-import com.tablesaw.io.TablesawIO;
 import com.tablesaw.logic.TablesawLogic;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Path;
@@ -16,7 +15,6 @@ import org.openjdk.jmh.annotations.*;
 @State(Scope.Benchmark)
 public abstract class BenchmarkDefaults {
 
-  protected final TablesawIO io;
   protected final TablesawLogic logic;
   protected final OperatingSystemMXBean os;
 
@@ -30,7 +28,6 @@ public abstract class BenchmarkDefaults {
   protected String flightsDataset;
 
   protected BenchmarkDefaults() {
-    this.io = new TablesawIO();
     this.logic = new TablesawLogic();
     this.os = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
 
@@ -60,8 +57,8 @@ public abstract class BenchmarkDefaults {
 
   @TearDown(Level.Iteration)
   public void tearDownIterationMetrics(ExtraMetrics metrics) {
-    long cpuAfter = os.getProcessCpuTime();
     long realAfter = System.nanoTime();
+    long cpuAfter = os.getProcessCpuTime();
     metrics.CPU = (double) (cpuAfter - cpuBefore) / (double) (realAfter - realBefore);
   }
 }

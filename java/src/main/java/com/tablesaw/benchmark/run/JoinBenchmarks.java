@@ -18,8 +18,8 @@ public class JoinBenchmarks extends BenchmarkDefaults {
   
   @Setup(Level.Trial)
   public void setupTrial() {
-    rawFlights = io.readParquet(resolveFlightsPath(flightsDataset));
-    rawAirlines = io.readParquet(resolveAirlinesPath());
+    rawFlights = logic.readParquet(resolveFlightsPath(flightsDataset));
+    rawAirlines = logic.readParquet(resolveAirlinesPath());
     joinedFlights = logic.join(rawFlights, rawAirlines);
     outputDir = resolveWriteOutputDir("join");
   }
@@ -33,7 +33,7 @@ public class JoinBenchmarks extends BenchmarkDefaults {
   @Benchmark
   public int writeJoin() throws IOException {
     Path output = outputDir.resolve(flightsDataset + "Join.parquet");
-    io.writeParquet(joinedFlights, output);
+    logic.writeParquet(joinedFlights, output);
     return joinedFlights.rowCount();
   }
 
