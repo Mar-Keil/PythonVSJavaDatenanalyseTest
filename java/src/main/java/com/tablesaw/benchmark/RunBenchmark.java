@@ -28,6 +28,6 @@ public final class RunBenchmark {
             .include(SortBenchmarks.class.getName())
             .build();
 
-    new Runner(options).run();
+    printCSV.runAndWrite(new Runner(options).run());
   }
 }

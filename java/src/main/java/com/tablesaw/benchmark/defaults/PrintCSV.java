@@ -5,6 +5,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Collection;
+import org.openjdk.jmh.results.RunResult;
 
 public class PrintCSV {
 
@@ -39,6 +41,39 @@ public class PrintCSV {
       return candidate;
     } catch (IOException exception) {
       throw new IllegalStateException("Could not create CSV output file.", exception);
+    }
+  }
+
+  public void runAndWrite(Collection<RunResult> results) {
+    for (RunResult result : results) {
+      String benchmarkSize = result.getParams().getParam("flightsDataset");
+
+      String benchmarkName = result.getParams().getBenchmark();
+      String method = benchmarkName.substring(benchmarkName.lastIndexOf('.') + 1);
+
+      double timeScore = result.getPrimaryResult().getScore() / 1_000.0;
+      double cpuScore = result.getSecondaryResults().get("CPU").getScore();
+
+      appendRow(benchmarkSize, method, "Time", timeScore, "s/op");
+      appendRow(benchmarkSize, method, "CPU", cpuScore, "cores/op");
+    }
+  }
+
+  private void appendRow(String benchmarkSize, String method, String category, double score, String unit) {
+        String row = String.join(
+                ",",
+                benchmarkSize,
+                method,
+                category,
+                Double.toString(score),
+                unit)
+            + System.lineSeparator();
+
+    try {
+      Files.writeString(
+          csvPath, row, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
+    } catch (IOException exception) {
+        throw new IllegalStateException("Could not append benchmark result to CSV.", exception);
     }
   }
 }
