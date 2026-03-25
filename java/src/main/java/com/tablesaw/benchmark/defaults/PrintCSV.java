@@ -24,13 +24,13 @@ public class PrintCSV {
     try {
       Files.createDirectories(outputDir);
 
+      Path candidate;
       int fileNumber = 1;
-      Path candidate = outputDir.resolve(fileNumber + "results.csv");
 
-      while (Files.exists(candidate)) {
+      do {
+        candidate = outputDir.resolve(fileNumber + "_results.csv");
         fileNumber++;
-        candidate = outputDir.resolve(fileNumber + "results.csv");
-      }
+      } while (Files.exists(candidate));
 
       Files.writeString(
           candidate,
