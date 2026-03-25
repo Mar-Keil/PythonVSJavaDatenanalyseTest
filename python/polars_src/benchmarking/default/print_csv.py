@@ -1,25 +1,37 @@
 import csv
 
+from pathlib import Path
+
 from polars_src.benchmarking.default.default_values import POLARS_OUT_DIR
 
-CSV_PATH = POLARS_OUT_DIR / "benchmark_results.csv"
 
+class PrintCSV:
+    def __init__(self) -> None:
+        POLARS_OUT_DIR.mkdir(parents=True, exist_ok=True)
+        self.csv_path = self._create_csv()
 
-def create_csv() -> None:
-    with CSV_PATH.open("w", newline="", encoding="utf-8") as csv_file:
-        writer = csv.writer(csv_file)
-        writer.writerow(["benchmark_size", "method", "category", "score", "unit"])
+    def _create_csv(self) -> Path:
+        file_number = 1
 
+        while True:
+            candidate = POLARS_OUT_DIR / f"{file_number}_results.csv"
+            if not candidate.exists():
+                with candidate.open("w", newline="", encoding="utf-8") as csv_file:
+                    writer = csv.writer(csv_file)
+                    writer.writerow(["benchmark_size", "method", "category", "score", "unit"])
+                return candidate
+            file_number += 1
 
-def write_result(
-        benchmark_size: str,
-        method: str,
-        category: str,
-        score: float,
-        unit: str,
-) -> None:
-    with CSV_PATH.open("a", newline="", encoding="utf-8") as csv_file:
-        writer = csv.writer(csv_file)
-        writer.writerow([benchmark_size, method, category, score, unit])
+    def write_result(
+            self,
+            benchmark_size: str,
+            method: str,
+            category: str,
+            score: float,
+            unit: str,
+    ) -> None:
+        with self.csv_path.open("a", newline="", encoding="utf-8") as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerow([benchmark_size, method, category, score, unit])
 
-    print(f"[CSV] {benchmark_size} | {method} | {category} = {score} {unit}")
+        print(f"[CSV] {benchmark_size} | {method} | {category} = {score} {unit}")

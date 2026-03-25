@@ -1,11 +1,12 @@
 from time import perf_counter
 from time import process_time
 
-from polars_src.benchmarking.default.print_csv import write_result
+from polars_src.benchmarking.default.print_csv import PrintCSV
 
 
 class TimeCPUMeasurement:
-    def __init__(self) -> None:
+    def __init__(self, print_csv: PrintCSV) -> None:
+        self.print_csv = print_csv
         self.time = 0.0
         self.cpu = 0.0
         self.invocations = 0
@@ -31,7 +32,7 @@ class TimeCPUMeasurement:
         cpu = self.cpu / self.invocations
         cpu_cores = cpu / time
 
-        write_result(benchmark_size, method, "Time", time, "s/op")
-        write_result(benchmark_size, method, "CPU", cpu_cores, "cores")
+        self.print_csv.write_result(benchmark_size, method, "Time", time, "s/op")
+        self.print_csv.write_result(benchmark_size, method, "CPU", cpu_cores, "cores")
 
         self.reset()

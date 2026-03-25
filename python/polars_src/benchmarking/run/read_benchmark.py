@@ -11,13 +11,11 @@ from polars_src.logic.logic import read_parquet
 
 
 class ReadBenchmark:
-    def run(self) -> None:
-        time = TimeCPUMeasurement();
+    def run(self, time_measurement: TimeCPUMeasurement) -> None:
         for path in PARAM:
 
             for _ in range(BENCHMARK_ITERATIONS):
 
-                # Set up iteration
                 invocation_loop = True
 
                 def stop_invocation() -> None:
@@ -28,20 +26,16 @@ class ReadBenchmark:
                 timer.start()
 
                 while invocation_loop:
+                    time_measurement.start()
 
-                    # Set up invocation
-                    time.start()
-
-                    # Run benchmark invocation
                     flights = read_parquet(path)
                     airlines = read_parquet(AIRLINES_INPUT_PATH)
 
-                    # Tear down invocation
-                    time.stop()
+                    time_measurement.stop()
+
                     del flights
                     del airlines
 
-                # Tear down iteration
                 timer.cancel()
 
-            time.write_results(path.stem.replace("Flights", ""), "Read")
+            time_measurement.write_results(path.stem.replace("Flights", ""), "Read")
