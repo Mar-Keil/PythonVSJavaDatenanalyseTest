@@ -1,6 +1,7 @@
 package com.tablesaw.benchmark.run;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.tablesaw.benchmark.defaults.BenchmarkDefaults;
@@ -13,13 +14,15 @@ public class PivotBenchmarks extends BenchmarkDefaults {
   private Table rawFlights;
   private Table pivotedFlights;
 
-  private Path outputDir;
+  private Path output;
   
   @Setup(Level.Trial)
-  public void setupTrial() {
+  public void setupTrial() throws IOException {
     rawFlights = logic.readParquet(resolveFlightsPath(flightsDataset));
     pivotedFlights = logic.pivot(rawFlights);
-    outputDir = resolveWriteOutputDir("pivot");
+    Path outputDir = resolveWriteOutputDir("pivot");
+    Files.createDirectories(outputDir);
+    output = outputDir.resolve(flightsDataset + "Pivot.parquet");
   }
 
   @Benchmark
@@ -29,8 +32,7 @@ public class PivotBenchmarks extends BenchmarkDefaults {
   }
 
   @Benchmark
-  public int writePivot() throws IOException {
-    Path output = outputDir.resolve(flightsDataset + "Pivot.parquet");
+  public int writePivot() {
     logic.writeParquet(pivotedFlights, output);
     return pivotedFlights.rowCount();
   }

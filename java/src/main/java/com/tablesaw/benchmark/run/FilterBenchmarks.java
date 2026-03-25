@@ -1,6 +1,7 @@
 package com.tablesaw.benchmark.run;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.tablesaw.benchmark.defaults.BenchmarkDefaults;
@@ -13,13 +14,15 @@ public class FilterBenchmarks extends BenchmarkDefaults {
   private Table rawFlights;
   private Table filteredFlights;
 
-  private Path outputDir;
+  private Path output;
 
   @Setup(Level.Trial)
-  public void setupTrial() {
+  public void setupTrial() throws IOException {
     rawFlights = logic.readParquet(resolveFlightsPath(flightsDataset));
     filteredFlights = logic.filter(rawFlights);
-    outputDir = resolveWriteOutputDir("filter");
+    Path outputDir = resolveWriteOutputDir("filter");
+    Files.createDirectories(outputDir);
+    output = outputDir.resolve(flightsDataset + "Filter.parquet");
   }
 
   @Benchmark
@@ -29,8 +32,7 @@ public class FilterBenchmarks extends BenchmarkDefaults {
   }
 
   @Benchmark
-  public void writeFilter() throws IOException {
-    Path output = outputDir.resolve(flightsDataset + "Filter.parquet");
+  public void writeFilter() {
     logic.writeParquet(filteredFlights, output);
   }
 }

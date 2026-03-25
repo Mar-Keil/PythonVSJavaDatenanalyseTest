@@ -1,6 +1,7 @@
 package com.tablesaw.benchmark.run;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.tablesaw.benchmark.defaults.BenchmarkDefaults;
@@ -14,14 +15,16 @@ public class JoinBenchmarks extends BenchmarkDefaults {
   private Table rawAirlines;
   private Table joinedFlights;
 
-  private Path outputDir;
+  private Path output;
   
   @Setup(Level.Trial)
-  public void setupTrial() {
+  public void setupTrial() throws IOException {
     rawFlights = logic.readParquet(resolveFlightsPath(flightsDataset));
     rawAirlines = logic.readParquet(resolveAirlinesPath());
     joinedFlights = logic.join(rawFlights, rawAirlines);
-    outputDir = resolveWriteOutputDir("join");
+    Path outputDir = resolveWriteOutputDir("join");
+    Files.createDirectories(outputDir);
+    output = outputDir.resolve(flightsDataset + "Join.parquet");
   }
 
   @Benchmark
@@ -31,8 +34,7 @@ public class JoinBenchmarks extends BenchmarkDefaults {
   }
 
   @Benchmark
-  public int writeJoin() throws IOException {
-    Path output = outputDir.resolve(flightsDataset + "Join.parquet");
+  public int writeJoin() {
     logic.writeParquet(joinedFlights, output);
     return joinedFlights.rowCount();
   }

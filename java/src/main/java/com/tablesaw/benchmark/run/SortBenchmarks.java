@@ -1,6 +1,7 @@
 package com.tablesaw.benchmark.run;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.tablesaw.benchmark.defaults.BenchmarkDefaults;
@@ -13,13 +14,15 @@ public class SortBenchmarks extends BenchmarkDefaults {
   private Table rawFlights;
   private Table sortedFlights;
 
-  private Path outputDir;
+  private Path output;
   
   @Setup(Level.Trial)
-  public void setupTrial() {
+  public void setupTrial() throws IOException {
     rawFlights = logic.readParquet(resolveFlightsPath(flightsDataset));
     sortedFlights = logic.sort(rawFlights);
-    outputDir = resolveWriteOutputDir("sort");
+    Path outputDir = resolveWriteOutputDir("sort");
+    Files.createDirectories(outputDir);
+    output = outputDir.resolve(flightsDataset + "Sort.parquet");
   }
 
   @Benchmark
@@ -29,10 +32,8 @@ public class SortBenchmarks extends BenchmarkDefaults {
   }
 
   @Benchmark
-  public int writeSort() throws IOException {
-    Path output = outputDir.resolve(flightsDataset + "Sort.parquet");
+  public int writeSort() {
     logic.writeParquet(sortedFlights, output);
     return sortedFlights.rowCount();
   }
-
 }
