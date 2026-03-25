@@ -51,7 +51,7 @@ public class PrintCSV {
       String benchmarkName = result.getParams().getBenchmark();
       String method = benchmarkName.substring(benchmarkName.lastIndexOf('.') + 1);
 
-      double timeScore = result.getPrimaryResult().getScore() / 1_000.0;
+      double timeScore = result.getPrimaryResult().getScore();
       double cpuScore = result.getSecondaryResults().get("CPU").getScore();
 
       appendRow(benchmarkSize, method, "Time", timeScore, "s/op");

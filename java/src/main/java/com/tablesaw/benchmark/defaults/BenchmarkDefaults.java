@@ -8,9 +8,9 @@ import java.util.concurrent.TimeUnit;
 import org.openjdk.jmh.annotations.*;
 
 @BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MILLISECONDS)
-@Warmup(iterations = 3)
-@Measurement(iterations = 7)
+@OutputTimeUnit(TimeUnit.SECONDS)
+@Warmup(iterations = 3, time = 10, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 7, time = 10, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1)
 @State(Scope.Benchmark)
 public abstract class BenchmarkDefaults {
