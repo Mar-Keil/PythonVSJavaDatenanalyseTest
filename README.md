@@ -41,7 +41,8 @@ Beispiel-Aufgaben:
 5. Benchmark-Harness fuer Zeit/CPU/RAM plus Ergebnisvalidierung aufbauen.
 
 ## Hinweise
-- Java laeuft ueber `mvn -f java/pom.xml package`.
+- Java-Benchmarks starten ueber `./run-benchmarks`.
+- Das Skript fuehrt vorher automatisch `mvn -f java/pom.xml clean package` aus.
 - Python-Abhaengigkeiten sollen in `python/pyproject.toml` definiert werden.
 - Reproduzierbare Python-Umgebung: `python3 -m venv python/.venv && python/.venv/bin/pip install -e ./python`
 - Das `venv` selbst sollte nicht versioniert werden. Fuer Reproduzierbarkeit gehoeren die Abhaengigkeiten und Startbefehle ins Repository, nicht die plattformspezifischen Dateien aus `.venv/`.

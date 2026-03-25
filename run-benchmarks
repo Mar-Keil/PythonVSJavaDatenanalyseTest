@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+JAVA17_HOME="${JAVA_HOME:-$("/usr/libexec/java_home" -v 17)}"
+JAR_PATH="${SCRIPT_DIR}/java/target/java-0.1.0-SNAPSHOT-benchmarks.jar"
+
+if [[ ! -x "${JAVA17_HOME}/bin/java" ]]; then
+  echo "Java 17 executable not found under: ${JAVA17_HOME}" >&2
+  exit 1
+fi
+
+mvn -f "${SCRIPT_DIR}/java/pom.xml" clean package
+
+exec caffeinate -im "${JAVA17_HOME}/bin/java" -Xmx14g -jar "${JAR_PATH}" "$@"
