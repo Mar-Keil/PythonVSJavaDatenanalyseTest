@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from polars_src.benchmarking.default.default_functions import create_csv
+from polars_src.benchmarking.default.print_csv import create_csv
 from polars_src.benchmarking.run.read_benchmark import ReadBenchmark
 
 
