@@ -1,7 +1,7 @@
 from time import perf_counter
 from time import process_time
 
-from polars_src.benchmarking.default.default_functions import write_result
+from polars_src.benchmarking.default.print_csv import write_result
 
 
 class TimeCPUMeasurement:
