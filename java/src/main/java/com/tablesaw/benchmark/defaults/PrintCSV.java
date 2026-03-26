@@ -57,6 +57,8 @@ public class PrintCSV {
       appendRow(benchmarkSize, method, "Time", timeScore, "s/op");
       appendRow(benchmarkSize, method, "CPU", cpuScore, "cores/op");
     }
+
+    System.out.println("Benchmark CSV written to: " + csvPath.toAbsolutePath());
   }
 
   private void appendRow(String benchmarkSize, String method, String category, double score, String unit) {
