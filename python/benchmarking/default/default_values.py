@@ -7,6 +7,7 @@ REPO_ROOT = BASE_DIR.parent
 BENCHMARKING_DIR = BASE_DIR / "benchmarking"
 
 DATA_GEN_OUT_DIR = REPO_ROOT / "data-gen" / "out"
+PANDAS_OUT_DIR = BENCHMARKING_DIR / "out_pandas"
 POLARS_OUT_DIR = BENCHMARKING_DIR / "out_polars"
 
 BENCHMARK_WARMUP = 3

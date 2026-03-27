@@ -16,8 +16,9 @@ dependencies = [
 ]
 
 [project.scripts]
+pandas-benchmarks = "benchmarking.run_pandas_benchmarks:main"
 polars-benchmarks = "benchmarking.run_polars_benchmarks:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["benchmarking*", "polars_logic*"]
+include = ["benchmarking*", "pandas_logic*", "polars_logic*"]
