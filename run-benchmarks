@@ -3,6 +3,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PYTHON_DIR="${SCRIPT_DIR}/python"
+POLARS_BENCH_BIN="${PYTHON_DIR}/.venv/bin/polars-benchmarks"
+PANDAS_BENCH_BIN="${PYTHON_DIR}/.venv/bin/pandas-benchmarks"
 JAVA17_HOME="${JAVA_HOME:-$("/usr/libexec/java_home" -v 17)}"
 JAR_PATH="${SCRIPT_DIR}/java/target/java-0.1.0-SNAPSHOT-benchmarks.jar"
 
@@ -11,6 +14,18 @@ if [[ ! -x "${JAVA17_HOME}/bin/java" ]]; then
   exit 1
 fi
 
+if [[ ! -x "${POLARS_BENCH_BIN}" ]]; then
+  echo "Polars benchmark entry point not found: ${POLARS_BENCH_BIN}" >&2
+  exit 1
+fi
+
+if [[ ! -x "${PANDAS_BENCH_BIN}" ]]; then
+  echo "Pandas benchmark entry point not found: ${PANDAS_BENCH_BIN}" >&2
+  exit 1
+fi
+
 mvn -f "${SCRIPT_DIR}/java/pom.xml" clean package
 
-exec caffeinate -im "${JAVA17_HOME}/bin/java" -Xmx14g -jar "${JAR_PATH}" "$@"
+caffeinate -im "${JAVA17_HOME}/bin/java" -Xmx14g -jar "${JAR_PATH}"
+caffeinate -im "${POLARS_BENCH_BIN}"
+caffeinate -im "${PANDAS_BENCH_BIN}"
