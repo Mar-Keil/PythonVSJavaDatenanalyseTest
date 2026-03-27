@@ -50,4 +50,6 @@ pip-wheel-metadata/
 # Generated docs/artifacts not intended for git
 /latex/
 /data-gen/out/
+/python/benchmarking/out_pandas/
+/python/benchmarking/out_polars/
 AGENTS.md
