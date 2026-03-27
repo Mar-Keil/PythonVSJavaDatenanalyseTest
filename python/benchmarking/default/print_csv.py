@@ -2,19 +2,18 @@ import csv
 
 from pathlib import Path
 
-from polars_src.benchmarking.default.default_values import POLARS_OUT_DIR
-
 
 class PrintCSV:
-    def __init__(self) -> None:
-        POLARS_OUT_DIR.mkdir(parents=True, exist_ok=True)
+    def __init__(self, output_dir: Path) -> None:
+        self.output_dir = output_dir
+        self.output_dir.mkdir(parents=True, exist_ok=True)
         self.csv_path = self._create_csv()
 
     def _create_csv(self) -> Path:
         file_number = 1
 
         while True:
-            candidate = POLARS_OUT_DIR / f"{file_number}_results.csv"
+            candidate = self.output_dir / f"{file_number}_results.csv"
             if not candidate.exists():
                 with candidate.open("w", newline="", encoding="utf-8") as csv_file:
                     writer = csv.writer(csv_file)

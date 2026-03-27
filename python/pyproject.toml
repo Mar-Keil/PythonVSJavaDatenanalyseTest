@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "python-benchmarks"
 version = "0.1.0"
 description = "Python benchmark suite for Polars and Pandas comparisons."
-readme = "polars_src/README.md"
+readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
   "pandas>=2.0.0",
@@ -16,8 +16,8 @@ dependencies = [
 ]
 
 [project.scripts]
-polars-benchmarks = "polars_src.benchmarking.run_benchmarks:main"
+polars-benchmarks = "benchmarking.run_polars_benchmarks:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["polars_src*"]
+include = ["benchmarking*", "polars_logic*"]

@@ -1,18 +1,24 @@
 from __future__ import annotations
 
-from polars_src.benchmarking.default.default_values import AIRLINES_INPUT_PATH
-from polars_src.benchmarking.default.default_values import BENCHMARK_ITERATIONS
-from polars_src.benchmarking.default.default_values import PARAM
-from polars_src.benchmarking.default.default_values import POLARS_OUT_DIR
-from polars_src.benchmarking.default.invocation_loop import InvocationLoop
-from polars_src.benchmarking.default.time_cpu_measurement import TimeCPUMeasurement
-from polars_src.logic.logic import join_dataset
-from polars_src.logic.logic import read_parquet
-from polars_src.logic.logic import write_parquet
+from pathlib import Path
+
+from benchmarking.default.default_values import AIRLINES_INPUT_PATH
+from benchmarking.default.default_values import BENCHMARK_ITERATIONS
+from benchmarking.default.default_values import PARAM
+from benchmarking.default.invocation_loop import InvocationLoop
+from benchmarking.default.time_cpu_measurement import TimeCPUMeasurement
+from polars_logic.logic import join_dataset
+from polars_logic.logic import read_parquet
+from polars_logic.logic import write_parquet
 
 
 class JoinBenchmark:
-    def run(self, logic_measurement: TimeCPUMeasurement, write_measurement: TimeCPUMeasurement) -> None:
+    def run(
+            self,
+            logic_measurement: TimeCPUMeasurement,
+            write_measurement: TimeCPUMeasurement,
+            output_dir: Path,
+    ) -> None:
         airlines = read_parquet(AIRLINES_INPUT_PATH)
 
         for path in PARAM:
@@ -41,7 +47,7 @@ class JoinBenchmark:
                 while invocation_loop_write.get_is_looping():
                     write_measurement.start()
 
-                    write_parquet(joined_flights, POLARS_OUT_DIR / "join")
+                    write_parquet(joined_flights, output_dir / "join")
 
                     write_measurement.stop()
 

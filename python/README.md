@@ -14,11 +14,11 @@ python/.venv/bin/pip install -e ./python
 ```
 
 Das installiert die benoetigten Python-Abhaengigkeiten inklusive `psutil` fuer
-die RAM-Messung und macht `polars_src` als Paket importierbar.
+die RAM-Messung und macht `benchmarking` und `polars_logic` als Pakete importierbar.
 
 ## Benchmark-Ausfuehrung
 ```bash
-python/.venv/bin/python -m polars_src.benchmarking.run_benchmarks
+python/.venv/bin/python -m benchmarking.run_polars_benchmarks
 ```
 
 Alternativ nach Installation:
@@ -26,4 +26,4 @@ Alternativ nach Installation:
 python/.venv/bin/polars-benchmarks
 ```
 
-Die Benchmark-Ergebnisse werden nach `python/polars_src/out/results.csv` geschrieben.
+Die Benchmark-Ergebnisse werden nach `python/benchmarking/out_polars/*.csv` geschrieben.

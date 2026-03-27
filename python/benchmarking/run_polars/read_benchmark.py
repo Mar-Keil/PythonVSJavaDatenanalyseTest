@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from polars_src.benchmarking.default.default_values import AIRLINES_INPUT_PATH
-from polars_src.benchmarking.default.default_values import BENCHMARK_ITERATIONS
-from polars_src.benchmarking.default.default_values import PARAM
-from polars_src.benchmarking.default.invocation_loop import InvocationLoop
-from polars_src.benchmarking.default.time_cpu_measurement import TimeCPUMeasurement
-from polars_src.logic.logic import read_parquet
+from benchmarking.default.default_values import AIRLINES_INPUT_PATH
+from benchmarking.default.default_values import BENCHMARK_ITERATIONS
+from benchmarking.default.default_values import PARAM
+from benchmarking.default.invocation_loop import InvocationLoop
+from benchmarking.default.time_cpu_measurement import TimeCPUMeasurement
+from polars_logic.logic import read_parquet
 
 
 class ReadBenchmark:

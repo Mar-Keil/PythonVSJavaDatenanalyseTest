@@ -1,6 +1,6 @@
 from threading import Timer
 
-from polars_src.benchmarking.default.default_values import BENCHMARK_DURATION_SECONDS
+from benchmarking.default.default_values import BENCHMARK_DURATION_SECONDS
 
 
 class InvocationLoop:
