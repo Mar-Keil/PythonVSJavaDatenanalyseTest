@@ -15,8 +15,6 @@ import org.openjdk.jmh.annotations.*;
 @State(Scope.Benchmark)
 public abstract class BenchmarkDefaults {
 
-  private final int iterations = BenchmarkDefaults.class.getAnnotation(Measurement.class).iterations();
-
   protected final TablesawLogic logic;
   protected final OperatingSystemMXBean os;
 
@@ -61,7 +59,6 @@ public abstract class BenchmarkDefaults {
   public void tearDownIterationMetrics(ExtraMetrics metrics) {
     long realAfter = System.nanoTime();
     long cpuAfter = os.getProcessCpuTime();
-    metrics.CPU =
-        (double) (cpuAfter - cpuBefore) / (double) (realAfter - realBefore) / iterations;
+    metrics.CPU = (double) (cpuAfter - cpuBefore) / (double) (realAfter - realBefore);
   }
 }
